@@ -1,0 +1,7 @@
+.flatpak-builder
+flatpak-build 
+flatpak-repo
+AppDir
+build 
+*.flatpak 
+*.AppImage

@@ -1,0 +1,35 @@
+<div align="center">
+  <img height="150" src="https://raw.githubusercontent.com/neoapps-dev/legacy-launcher/refs/heads/main/packaging/icon.png">
+  <h1>Legacy Launcher</h1>
+  <p>Launcher for Minecraft Legacy Console Edition on GNU/Linux</p>
+</div>
+
+## Important!
+This project does ***not*** include the source code for Minecraft Legacy Edition, nor any code copyrighted by Mojang AB, Microsoft, or 4J Studios.
+
+## Supported Platforms
+Legacy Launcher is designed primarily for GNU/Linux. Windows or macOS support is not on our list, nor is currently supported.
+Though contributions to add support for those platforms are very welcome.
+
+## Installation
+| Type | Link |
+| --- | ----------- |
+| Native Build | [here](https://github.com/neoapps-dev/legacy-launcher/releases/download/legacy-launcher) |
+| AppImage (x86_64) | [here](https://github.com/neoapps-dev/legacy-launcher/releases/download/LegacyLauncher-1.0.0-x86_64.AppImage) |
+| Flatpak | [here](https://github.com/neoapps-dev/legacy-launcher/releases/download/LegacyLauncher-1.0.0.flatpak) |
+
+## Building from source
+The source code for Legacy Launcher uses the CMake build system. A Makefile is also provided for ease of use.
+```sh
+make                  # compile native
+make install          # compile native and install it
+make debug            # compile debug rather than release
+make flatpak          # compile flatpak
+make flatpak-install  # compile flatpak and install it
+make flatpak-run      # run the installed flatpak
+make appimage         # compiles an AppImage
+make clean            # cleans the directory from build output
+```
+
+## License
+Legacy Launcher is licensed under the [MIT license](LICENSE)

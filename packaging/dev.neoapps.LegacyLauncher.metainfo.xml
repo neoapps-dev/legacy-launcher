@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.neoapps.LegacyLauncher</id>
+  <name>Legacy Launcher</name>
+  <summary>Launcher for Minecraft Legacy Console Edition on Linux</summary>
+  <description>
+    <p>
+      Legacy Launcher lets you install, manage, and run multiple instances of
+      Minecraft Legacy Console Edition on GNU/Linux using Proton. It auto-detects
+      Proton installations from both native Steam and Flatpak Steam, tracks GitHub
+      releases for updates, and supports headless server mode.
+    </p>
+  </description>
+  <launchable type="desktop-id">dev.neoapps.LegacyLauncher.desktop</launchable>
+  <url type="homepage">https://github.com/neoapps-dev/legacy-launcher</url>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <categories>
+    <category>Game</category>
+  </categories>
+  <releases>
+    <release version="1.0.0" date="2026-03-05"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Legacy Launcher
+GenericName=Minecraft Legacy Console Edition Launcher
+Comment=Minecraft LCE Launcher
+Exec=legacy-launcher %u
+Icon=dev.neoapps.LegacyLauncher
+Categories=Game;
+Keywords=minecraft;legacy;console;launcher;
+StartupNotify=true
+MimeType=
