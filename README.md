@@ -14,9 +14,9 @@ Though contributions to add support for those platforms are very welcome.
 ## Installation
 | Type | Link |
 | --- | ----------- |
-| Native Build | [here](https://github.com/neoapps-dev/legacy-launcher/releases/download/legacy-launcher) |
-| AppImage (x86_64) | [here](https://github.com/neoapps-dev/legacy-launcher/releases/download/LegacyLauncher-1.0.0-x86_64.AppImage) |
-| Flatpak | [here](https://github.com/neoapps-dev/legacy-launcher/releases/download/LegacyLauncher-1.0.0.flatpak) |
+| Native Build | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/legacy-launcher) |
+| AppImage (x86_64) | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.0.0-x86_64.AppImage) |
+| Flatpak | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.0.0.flatpak) |
 
 ## Building from source
 The source code for Legacy Launcher uses the CMake build system. A Makefile is also provided for ease of use.
@@ -31,5 +31,9 @@ make appimage         # compiles an AppImage
 make clean            # cleans the directory from build output
 ```
 
+## Extras
+Legacy Launcher also comes with a few flags you can use:
+- `--auto`: Runs the last instance launched without showing the launcher window
+
 ## License
-Legacy Launcher is licensed under the [MIT license](LICENSE)
+Legacy Launcher is licensed under the [MIT License](LICENSE)
