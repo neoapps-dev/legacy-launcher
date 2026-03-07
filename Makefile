@@ -2,7 +2,7 @@ BUILD_DIR := build
 APPDIR := AppDir
 APPIMAGE_TOOL ?= appimagetool
 APP_ID := dev.neoapps.LegacyLauncher
-VERSION ?= 1.0.0
+VERSION ?= 1.1.0
 all: $(BUILD_DIR)
 	cmake --build $(BUILD_DIR) --parallel
 
