@@ -20,6 +20,7 @@ set(SOURCES
     src/AddInstanceDialog.cpp
     src/SettingsDialog.cpp
     src/InstanceWidget.cpp
+    src/UpdateInstanceDialog.cpp
 )
 
 set(HEADERS
@@ -32,6 +33,7 @@ set(HEADERS
     include/AddInstanceDialog.h
     include/SettingsDialog.h
     include/InstanceWidget.h
+    include/UpdateInstanceDialog.h
     include/Types.h
 )
 

@@ -20,6 +20,9 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 private slots:
     void onAddInstance();
     void onLaunchRequested(const QString &id);
@@ -50,10 +53,11 @@ private:
     QList<InstanceWidget *> m_instanceWidgets;
 
     void setupUi();
+    void applyGlobalStylesheet();
     void rebuildInstanceList();
+    void updateFocusChain();
     InstanceWidget *widgetForId(const QString &id);
     ProtonInstallation protonForId(const QString &id) const;
-    void performUpdate(const QString &instanceId, const ReleaseInfo &release);
     QString latestTagForInstance(const Instance &inst) const;
     bool isUpdateAvailable(const Instance &inst) const;
 };

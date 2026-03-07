@@ -17,6 +17,7 @@ InstanceWidget::InstanceWidget(const Instance &instance, QWidget *parent)
 
 void InstanceWidget::setupUi() {
     QFrame *card = new QFrame(this);
+    card->setObjectName("instanceCard");
     card->setFrameShape(QFrame::StyledPanel);
     card->setFrameShadow(QFrame::Raised);
 
@@ -50,6 +51,7 @@ void InstanceWidget::setupUi() {
     cardLayout->addLayout(infoLayout, 1);
 
     m_statusBadge = new QLabel();
+    m_statusBadge->setObjectName("statusBadge");
     m_statusBadge->setAlignment(Qt::AlignCenter);
     m_statusBadge->setVisible(false);
     cardLayout->addWidget(m_statusBadge);
@@ -57,19 +59,23 @@ void InstanceWidget::setupUi() {
     QHBoxLayout *actionsLayout = new QHBoxLayout();
     actionsLayout->setSpacing(4);
 
-    m_updateBtn = new QPushButton(tr("Update"));
-    m_updateBtn->setVisible(false);
+    m_updateBtn = new QPushButton(tr("Change Version"));
+    m_updateBtn->setObjectName("updateBtn");
+    m_updateBtn->setAutoDefault(false);
     actionsLayout->addWidget(m_updateBtn);
 
     m_settingsBtn = new QPushButton(tr("Settings"));
+    m_settingsBtn->setObjectName("settingsBtn");
     m_settingsBtn->setAutoDefault(false);
     actionsLayout->addWidget(m_settingsBtn);
 
     m_deleteBtn = new QPushButton(tr("Delete"));
+    m_deleteBtn->setObjectName("deleteBtn");
     m_deleteBtn->setAutoDefault(false);
     actionsLayout->addWidget(m_deleteBtn);
 
     m_launchBtn = new QPushButton(tr("Launch"));
+    m_launchBtn->setObjectName("launchBtn");
     m_launchBtn->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
     actionsLayout->addWidget(m_launchBtn);
 
@@ -107,7 +113,6 @@ void InstanceWidget::setRunning(bool running) {
 void InstanceWidget::setUpdateAvailable(bool available, const QString &newTag) {
     m_updateAvailable = available;
     m_latestTag = newTag;
-    m_updateBtn->setVisible(available);
     refresh();
 }
 
@@ -134,14 +139,20 @@ void InstanceWidget::refresh() {
         m_launchBtn->setText(tr("Stop"));
         m_settingsBtn->setEnabled(false);
         m_deleteBtn->setEnabled(false);
+        m_updateBtn->setEnabled(false);
     } else {
         m_statusBadge->setVisible(false);
         m_launchBtn->setText(tr("Launch"));
         m_settingsBtn->setEnabled(true);
         m_deleteBtn->setEnabled(true);
+        m_updateBtn->setEnabled(true);
     }
 
     if (m_updateAvailable && !m_latestTag.isEmpty()) {
-        m_updateBtn->setText(tr("Update to %1").arg(m_latestTag));
+        m_updateBtn->setText(tr("\xe2\xac\x86 Update to %1").arg(m_latestTag));
+        m_updateBtn->setStyleSheet("color: #4ecdc4; border-color: #4ecdc4;");
+    } else {
+        m_updateBtn->setText(tr("Change Version"));
+        m_updateBtn->setStyleSheet("");
     }
 }
