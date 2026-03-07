@@ -8,6 +8,9 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QStatusBar>
+#include <QStackedWidget>
+#include <QComboBox>
+#include <QButtonGroup>
 
 class InstanceManager;
 class ProtonDetector;
@@ -37,6 +40,9 @@ private slots:
     void onInstanceError(const QString &id, const QString &error);
     void onRefreshReleases();
 
+    void onPlayButtonClicked();
+    void onTabNavClicked(int id);
+
 private:
     InstanceManager *m_instanceManager;
     LaunchManager *m_launchManager;
@@ -45,6 +51,20 @@ private:
     QList<ReleaseInfo> m_releases;
 
     QWidget *m_centralWidget;
+    
+    // Navigation
+    QButtonGroup *m_tabGroup;
+    QButtonGroup *m_sidebarGroup;
+    QStackedWidget *m_mainStack;
+
+    // Play Tab
+    QWidget *m_playTab;
+    QComboBox *m_instanceCombo;
+    QPushButton *m_playBtn;
+    QLabel *m_playStatusLabel;
+
+    // Installations Tab
+    QWidget *m_installationsTab;
     QVBoxLayout *m_instanceListLayout;
     QScrollArea *m_scrollArea;
     QLabel *m_emptyLabel;
@@ -56,6 +76,8 @@ private:
     void applyGlobalStylesheet();
     void rebuildInstanceList();
     void updateFocusChain();
+    void updatePlayButtonState();
+
     InstanceWidget *widgetForId(const QString &id);
     ProtonInstallation protonForId(const QString &id) const;
     QString latestTagForInstance(const Instance &inst) const;
