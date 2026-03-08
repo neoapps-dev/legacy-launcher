@@ -23,6 +23,7 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QStackedLayout>
+#include <QGridLayout>
 #include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -147,9 +148,12 @@ void MainWindow::applyGlobalStylesheet() {
     QComboBox#instanceCombo::drop-down {
         border: none;
         width: 0px;
+        image: none;
     }
     QComboBox#instanceCombo::down-arrow {
         image: none;
+        width: 0px;
+        height: 0px;
     }
     QComboBox#instanceCombo QAbstractItemView {
         background-color: #333;
@@ -328,9 +332,6 @@ void MainWindow::setupUi() {
   nameLabel->setStyleSheet("color: white; font-weight: bold; font-size: 14px;");
   nameRow->addWidget(nameLabel);
   
-  QLabel *chevronLabel = new QLabel("▾");
-  chevronLabel->setStyleSheet("color: #aaaaaa; font-size: 12px;");
-  nameRow->addWidget(chevronLabel);
   nameRow->addStretch();
   
   userInfoLayout->addLayout(nameRow);
@@ -348,13 +349,36 @@ void MainWindow::setupUi() {
   m_sidebarGroup = new QButtonGroup(this);
   m_sidebarGroup->setExclusive(true);
   
-  QPushButton *btnLegacy = new QPushButton(tr("  Minecraft: Legacy Console"));
+  QPushButton *btnLegacy = new QPushButton();
   btnLegacy->setObjectName("sidebarBtn");
   btnLegacy->setCheckable(true);
   btnLegacy->setChecked(true);
-  btnLegacy->setIcon(QIcon(":/packaging/icon.png"));
-  btnLegacy->setIconSize(QSize(32, 32));
-
+  btnLegacy->setFixedHeight(54);
+  
+  QHBoxLayout *btnLegLayout = new QHBoxLayout(btnLegacy);
+  btnLegLayout->setContentsMargins(15, 5, 5, 5);
+  btnLegLayout->setSpacing(12);
+  
+  QLabel *legIcon = new QLabel();
+  legIcon->setPixmap(QPixmap(":/packaging/icon.png").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  legIcon->setAttribute(Qt::WA_TransparentForMouseEvents);
+  btnLegLayout->addWidget(legIcon);
+  
+  QVBoxLayout *legTextLayout = new QVBoxLayout();
+  legTextLayout->setContentsMargins(0, 4, 0, 4);
+  legTextLayout->setSpacing(0);
+  QLabel *lblTop = new QLabel("MINECRAFT");
+  lblTop->setStyleSheet("color: #aaaaaa; font-size: 10px; font-weight: bold; background: transparent;");
+  lblTop->setAttribute(Qt::WA_TransparentForMouseEvents);
+  QLabel *lblBottom = new QLabel(tr("Legacy Console"));
+  lblBottom->setStyleSheet("color: white; font-size: 14px; font-weight: bold; background: transparent;");
+  lblBottom->setAttribute(Qt::WA_TransparentForMouseEvents);
+  legTextLayout->addWidget(lblTop);
+  legTextLayout->addWidget(lblBottom);
+  
+  btnLegLayout->addLayout(legTextLayout);
+  btnLegLayout->addStretch();
+  
   m_sidebarGroup->addButton(btnLegacy, 1);
   sidebarLayout->addSpacing(10);
   sidebarLayout->addWidget(btnLegacy);
@@ -450,81 +474,100 @@ void MainWindow::setupUi() {
   
   QWidget *playBottomBar = new QWidget();
   playBottomBar->setObjectName("playBottomBar");
-  QVBoxLayout *outerBarLayout = new QVBoxLayout(playBottomBar);
-  outerBarLayout->setContentsMargins(0, 0, 0, 0);
+  playBottomBar->setFixedHeight(105);
+  
+  QGridLayout *playBarGrid = new QGridLayout(playBottomBar);
+  playBarGrid->setContentsMargins(0, 0, 0, 0);
 
-  QWidget *innerBar = new QWidget();
-  innerBar->setObjectName("playBottomBarInner");
-  innerBar->setFixedHeight(120);
-  QHBoxLayout *bottomBarLayout = new QHBoxLayout(innerBar);
+  QWidget *bgContainer = new QWidget();
+  QVBoxLayout *bgLayout = new QVBoxLayout(bgContainer);
+  bgLayout->setContentsMargins(0, 0, 0, 0);
+  bgLayout->addStretch();
+  
+  QFrame *innerBarBg = new QFrame();
+  innerBarBg->setObjectName("playBottomBarInner");
+  innerBarBg->setFixedHeight(75);
+  
+  QHBoxLayout *bottomBarLayout = new QHBoxLayout(innerBarBg);
   bottomBarLayout->setContentsMargins(20, 0, 20, 0);
   
-  QWidget *versionWidget = new QWidget();
-  versionWidget->setMinimumWidth(140);
-  versionWidget->setMaximumWidth(260);
-  versionWidget->setFixedHeight(60);
+  m_instanceCombo = new QComboBox();
+  m_instanceCombo->setObjectName("instanceCombo");
+  m_instanceCombo->setCursor(Qt::PointingHandCursor);
+  m_instanceCombo->installEventFilter(this);
+  m_instanceCombo->setMinimumWidth(240);
+  m_instanceCombo->setMaximumWidth(320);
+  m_instanceCombo->setFixedHeight(60);
+  m_instanceCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   
-  QStackedLayout *stackLayout = new QStackedLayout(versionWidget);
-  stackLayout->setStackingMode(QStackedLayout::StackAll);
-  
-  QWidget *contentWidget = new QWidget();
+  QWidget *contentWidget = new QWidget(m_instanceCombo);
+  contentWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
   QHBoxLayout *vLayout = new QHBoxLayout(contentWidget);
   vLayout->setContentsMargins(10, 5, 10, 5);
-  vLayout->setSpacing(15);
+  vLayout->setSpacing(10);
   
   QLabel *vIcon = new QLabel();
-  vIcon->setPixmap(QPixmap(":/packaging/icon.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  vIcon->setPixmap(QPixmap(":/packaging/icon.png").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  vIcon->setAttribute(Qt::WA_TransparentForMouseEvents);
   vLayout->addWidget(vIcon);
   
   QVBoxLayout *vTextLayout = new QVBoxLayout();
   vTextLayout->setContentsMargins(0, 5, 0, 5);
   vTextLayout->setSpacing(2);
   
-  QLabel *vTitle = new QLabel(tr("Latest release"));
+  QLabel *vTitle = new QLabel("");
   vTitle->setObjectName("selectedInstTitle");
   vTitle->setStyleSheet("color: white; font-weight: bold; font-size: 15px;");
-  vTitle->setMinimumWidth(50);
+  vTitle->setAttribute(Qt::WA_TransparentForMouseEvents);
   vTextLayout->addWidget(vTitle);
   
   QLabel *vText = new QLabel("");
   vText->setObjectName("selectedInstText");
   vText->setStyleSheet("color: #aaaaaa; font-size: 13px;");
-  vText->setMinimumWidth(50);
+  vText->setAttribute(Qt::WA_TransparentForMouseEvents);
   vTextLayout->addWidget(vText);
   
   vLayout->addLayout(vTextLayout);
-  vLayout->addStretch();
   
   QLabel *vChevron = new QLabel("▾");
   vChevron->setStyleSheet("color: #aaaaaa; font-size: 14px;");
+  vChevron->setAttribute(Qt::WA_TransparentForMouseEvents);
   vLayout->addWidget(vChevron);
   
-  m_instanceCombo = new QComboBox();
-  m_instanceCombo->setObjectName("instanceCombo");
-  m_instanceCombo->setCursor(Qt::PointingHandCursor);
+  vLayout->addStretch();
+  m_instanceCombo->setLayout(new QVBoxLayout());
+  m_instanceCombo->layout()->setContentsMargins(0, 0, 0, 0);
+  m_instanceCombo->layout()->addWidget(contentWidget);
   
-  stackLayout->addWidget(contentWidget);
-  stackLayout->addWidget(m_instanceCombo);
-  
-  bottomBarLayout->addWidget(versionWidget, 0, Qt::AlignVCenter);
-  
-  bottomBarLayout->addStretch(1);
-
-  m_playBtn = new QPushButton(tr("PLAY"));
-  m_playBtn->setObjectName("playBtn");
-  m_playBtn->setCursor(Qt::PointingHandCursor);
-  bottomBarLayout->addWidget(m_playBtn, 0, Qt::AlignCenter);
-  
+  bottomBarLayout->addWidget(m_instanceCombo, 0, Qt::AlignVCenter);
   bottomBarLayout->addStretch(1);
 
   m_playStatusLabel = new QLabel(username);
   m_playStatusLabel->setStyleSheet("color: white; font-weight: bold; font-size: 15px; text-align: right;");
   m_playStatusLabel->setMinimumWidth(100);
   m_playStatusLabel->setMaximumWidth(260);
+  m_playStatusLabel->setFixedHeight(60);
   m_playStatusLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
   bottomBarLayout->addWidget(m_playStatusLabel, 0, Qt::AlignRight);
   
-  outerBarLayout->addWidget(innerBar);
+  bgLayout->addWidget(innerBarBg);
+  playBarGrid->addWidget(bgContainer, 0, 0);
+
+  QVBoxLayout *btnLayout = new QVBoxLayout();
+  btnLayout->setContentsMargins(0, 0, 0, 15);
+  btnLayout->addStretch();
+  QHBoxLayout *btnHLayout = new QHBoxLayout();
+  btnHLayout->addStretch(1);
+  m_playBtn = new QPushButton(tr("PLAY"));
+  m_playBtn->setObjectName("playBtn");
+  m_playBtn->setCursor(Qt::PointingHandCursor);
+  m_playBtn->setFixedHeight(75);
+  btnHLayout->addWidget(m_playBtn);
+  btnHLayout->addStretch(1);
+  btnLayout->addLayout(btnHLayout);
+  
+  playBarGrid->addLayout(btnLayout, 0, 0);
+  
   playLayout->addWidget(playBottomBar);
   m_mainStack->addWidget(m_playTab);
 
@@ -626,6 +669,7 @@ void MainWindow::updatePlayButtonState() {
   QString id = m_instanceCombo->currentData().toString();
   
   if (instTitle) instTitle->setText(m_instanceCombo->currentText());
+  
   if (instText) {
       Instance *inst = m_instanceManager->findById(id);
       if (inst) {
@@ -743,6 +787,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
           
           bgLabel->setPixmap(scaledBg.copy(x, y, s.width(), s.height()));
       }
+  }
+
+  if (obj == m_instanceCombo && event->type() == QEvent::MouseButtonPress) {
+      m_instanceCombo->showPopup();
+      return true;
   }
 
   if (event->type() == QEvent::KeyPress) {
