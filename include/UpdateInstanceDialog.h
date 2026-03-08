@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Types.h"
-#include <QDialog>
+#include <QWidget>
 #include <QList>
 #include <QComboBox>
 #include <QPushButton>
@@ -11,7 +11,7 @@
 class GitHubReleaseTracker;
 class Downloader;
 
-class UpdateInstanceDialog : public QDialog {
+class UpdateInstanceDialog : public QWidget {
     Q_OBJECT
 public:
     explicit UpdateInstanceDialog(const Instance &instance,
@@ -19,6 +19,9 @@ public:
                                   QWidget *parent = nullptr);
 
     Instance updatedInstance() const;
+
+signals:
+    void finished(bool accepted);
 
 private slots:
     void onUpdateClicked();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Types.h"
-#include <QDialog>
+#include <QWidget>
 #include <QList>
 #include <QLineEdit>
 #include <QComboBox>
@@ -13,12 +13,15 @@
 class GitHubReleaseTracker;
 class Downloader;
 
-class AddInstanceDialog : public QDialog {
+class AddInstanceDialog : public QWidget {
     Q_OBJECT
 public:
     explicit AddInstanceDialog(const QList<ProtonInstallation> &protons, QWidget *parent = nullptr);
 
     Instance createdInstance() const;
+
+signals:
+    void finished(bool accepted);
 
 private slots:
     void onReleasesUpdated(QList<ReleaseInfo> releases);

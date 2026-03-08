@@ -291,11 +291,14 @@ void MainWindow::applyGlobalStylesheet() {
 }
 
 void MainWindow::setupUi() {
-  m_centralWidget = new QWidget(this);
-  m_centralWidget->setObjectName("centralPanel");
-  setCentralWidget(m_centralWidget);
+  m_rootStack = new QStackedWidget(this);
+  m_rootStack->setObjectName("rootStack");
+  setCentralWidget(m_rootStack);
 
-  QHBoxLayout *mainLayout = new QHBoxLayout(m_centralWidget);
+  QWidget *launcherPage = new QWidget(this);
+  launcherPage->setObjectName("launcherPage");
+  
+  QHBoxLayout *mainLayout = new QHBoxLayout(launcherPage);
   mainLayout->setContentsMargins(0, 0, 0, 0);
   mainLayout->setSpacing(0);
 
@@ -439,7 +442,6 @@ void MainWindow::setupUi() {
   
   rightLayout->addWidget(topNav);
 
-  // Stacked Widget covering the rest
   m_mainStack = new QStackedWidget();
 
   // --- PLAY TAB ---
@@ -621,6 +623,8 @@ void MainWindow::setupUi() {
   rightLayout->addWidget(m_mainStack);
   mainLayout->addWidget(rightArea);
 
+  m_rootStack->addWidget(launcherPage);
+
   // Connections
   connect(m_tabGroup, &QButtonGroup::idClicked, this, &MainWindow::onTabNavClicked);
   connect(m_playBtn, &QPushButton::clicked, this, &MainWindow::onPlayButtonClicked);
@@ -693,7 +697,6 @@ void MainWindow::updatePlayButtonState() {
   }
   m_playBtn->setEnabled(true);
   
-  // Force stylesheet re-evaluation to swap styling
   m_playBtn->style()->unpolish(m_playBtn);
   m_playBtn->style()->polish(m_playBtn);
 }
@@ -718,14 +721,12 @@ void MainWindow::rebuildInstanceList() {
   m_emptyLabel->setVisible(instances.isEmpty());
 
   for (const Instance &inst : instances) {
-    // Play tab combo box
     m_instanceCombo->addItem(inst.name, inst.id);
     if (!inst.installedTag.isEmpty()) {
        m_instanceCombo->setItemData(m_instanceCombo->count() - 1, 
            inst.name + " (" + inst.installedTag + ")", Qt::ToolTipRole);
     }
 
-    // Installations Tab widget
     InstanceWidget *w = new InstanceWidget(inst, this);
     w->setRunning(m_launchManager->isRunning(inst.id));
 
@@ -826,10 +827,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void MainWindow::onAddInstance() {
-  AddInstanceDialog dlg(m_protons, this);
-  if (dlg.exec() == QDialog::Accepted) {
-    m_instanceManager->addInstance(dlg.createdInstance());
-  }
+  AddInstanceDialog *page = new AddInstanceDialog(m_protons, this);
+  m_rootStack->addWidget(page);
+  m_rootStack->setCurrentWidget(page);
+  
+  connect(page, &AddInstanceDialog::finished, this, [this, page](bool accepted) {
+      if (accepted) {
+          m_instanceManager->addInstance(page->createdInstance());
+      }
+      m_rootStack->removeWidget(page);
+      page->deleteLater();
+  });
 }
 
 void MainWindow::onLaunchRequested(const QString &id) {
@@ -862,10 +870,17 @@ void MainWindow::onSettingsRequested(const QString &id) {
   if (!inst)
     return;
 
-  SettingsDialog dlg(*inst, m_protons, this);
-  if (dlg.exec() == QDialog::Accepted) {
-    m_instanceManager->updateInstance(dlg.updatedInstance());
-  }
+  SettingsDialog *page = new SettingsDialog(*inst, m_protons, this);
+  m_rootStack->addWidget(page);
+  m_rootStack->setCurrentWidget(page);
+  
+  connect(page, &SettingsDialog::finished, this, [this, page](bool accepted) {
+      if (accepted) {
+          m_instanceManager->updateInstance(page->updatedInstance());
+      }
+      m_rootStack->removeWidget(page);
+      page->deleteLater();
+  });
 }
 
 void MainWindow::onUpdateRequested(const QString &id) {
@@ -873,13 +888,20 @@ void MainWindow::onUpdateRequested(const QString &id) {
   if (!inst)
     return;
 
-  UpdateInstanceDialog dlg(*inst, m_releases, this);
-  if (dlg.exec() == QDialog::Accepted) {
-    m_instanceManager->updateInstance(dlg.updatedInstance());
-    statusBar()->showMessage(tr("Updated \"%1\" to %2.")
-                                 .arg(inst->name)
-                                 .arg(dlg.updatedInstance().installedTag));
-  }
+  UpdateInstanceDialog *page = new UpdateInstanceDialog(*inst, m_releases, this);
+  m_rootStack->addWidget(page);
+  m_rootStack->setCurrentWidget(page);
+  
+  connect(page, &UpdateInstanceDialog::finished, this, [this, page, inst](bool accepted) {
+      if (accepted) {
+          m_instanceManager->updateInstance(page->updatedInstance());
+          statusBar()->showMessage(tr("Updated \"%1\" to %2.")
+                                       .arg(inst->name)
+                                       .arg(page->updatedInstance().installedTag));
+      }
+      m_rootStack->removeWidget(page);
+      page->deleteLater();
+  });
 }
 
 void MainWindow::onDeleteRequested(const QString &id) {

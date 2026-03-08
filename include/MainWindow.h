@@ -11,6 +11,7 @@
 #include <QStackedWidget>
 #include <QComboBox>
 #include <QButtonGroup>
+#include <QStackedWidget>
 #include <QTextBrowser>
 
 class InstanceManager;
@@ -70,6 +71,7 @@ private:
 
     // Installations Tab
     QWidget *m_installationsTab;
+    QStackedWidget *m_rootStack;
     QVBoxLayout *m_instanceListLayout;
     QScrollArea *m_scrollArea;
     QLabel *m_emptyLabel;

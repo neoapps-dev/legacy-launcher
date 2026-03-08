@@ -6,6 +6,10 @@
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QProgressBar>
+#include <QScrollArea>
 #include <QMessageBox>
 #include <QDir>
 #include <QProcess>
@@ -13,11 +17,12 @@
 UpdateInstanceDialog::UpdateInstanceDialog(const Instance &instance,
                                            const QList<ReleaseInfo> &releases,
                                            QWidget *parent)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_instance(instance)
     , m_releases(releases)
     , m_downloader(new Downloader(this))
 {
+    setObjectName("updateInstancePage");
     setWindowTitle(tr("Update Instance"));
     setMinimumWidth(550);
     setupUi();
@@ -27,44 +32,154 @@ UpdateInstanceDialog::UpdateInstanceDialog(const Instance &instance,
 }
 
 void UpdateInstanceDialog::setupUi() {
+    setStyleSheet(R"(
+        QWidget#updateInstancePage {
+            background-color: #313338;
+        }
+        QLabel {
+            color: #b9bbbe;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        QLabel#titleLabel {
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: none;
+        }
+        QLabel#infoLabel {
+            text-transform: none;
+            font-weight: normal;
+            font-size: 13px;
+        }
+        QLabel#valLabel {
+            color: white;
+            font-size: 14px;
+            font-weight: normal;
+            text-transform: none;
+            background-color: #1e1f22;
+            border: 1px solid #101113;
+            border-radius: 4px;
+            padding: 12px;
+        }
+        QComboBox {
+            background-color: #1e1f22;
+            color: white;
+            border: 1px solid #101113;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 14px;
+        }
+        QComboBox:hover {
+            border: 1px solid #4f545c;
+        }
+        QComboBox:focus {
+            border: 1px solid #5865f2;
+        }
+        QComboBox::drop-down {
+            border: none;
+        }
+        QPushButton {
+            font-weight: bold;
+            border-radius: 3px;
+        }
+        QPushButton#updateConfirmBtn {
+            background-color: #2e8b57;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+        }
+        QPushButton#updateConfirmBtn:hover {
+            background-color: #3cb371;
+        }
+        QPushButton#updateConfirmBtn:disabled {
+            background-color: #555555;
+            color: #888888;
+        }
+        QPushButton#updateCancelBtn {
+            background-color: transparent;
+            color: white;
+            padding: 10px 24px;
+            border: 1px solid #4f545c;
+        }
+        QPushButton#updateCancelBtn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        QPushButton#closeBtn {
+            background-color: transparent;
+            color: #b9bbbe;
+            border: 1px solid #4f545c;
+            border-radius: 16px;
+            font-size: 16px;
+        }
+        QPushButton#closeBtn:hover {
+            background-color: #4f545c;
+            color: white;
+        }
+    )");
+
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(16);
-    mainLayout->setContentsMargins(24, 24, 24, 24);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
+    QWidget *headerWidget = new QWidget();
+    QHBoxLayout *headerLayout = new QHBoxLayout(headerWidget);
+    headerLayout->setContentsMargins(40, 40, 40, 10);
+    
+    headerLayout->addStretch();
     QLabel *titleLabel = new QLabel(tr("Change Version"));
-    QFont titleFont = titleLabel->font();
-    titleFont.setPointSize(titleFont.pointSize() + 4);
-    titleFont.setBold(true);
-    titleLabel->setFont(titleFont);
-    mainLayout->addWidget(titleLabel);
+    titleLabel->setObjectName("titleLabel");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    headerLayout->addWidget(titleLabel);
+    headerLayout->addStretch();
+    
+    QPushButton *closeBtn = new QPushButton("✕");
+    closeBtn->setObjectName("closeBtn");
+    closeBtn->setFixedSize(32, 32);
+    connect(closeBtn, &QPushButton::clicked, this, [this]{ emit finished(false); });
+    headerLayout->addWidget(closeBtn);
+    
+    mainLayout->addWidget(headerWidget);
 
-    QGroupBox *infoGroup = new QGroupBox(tr("Instance Info"));
-    infoGroup->setObjectName("updateInfoGroup");
-    QFormLayout *infoForm = new QFormLayout(infoGroup);
-    infoForm->setSpacing(8);
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    scrollArea->setStyleSheet("QScrollArea { background-color: transparent; } QScrollBar { background: #2b2d31; width: 8px; } QScrollBar::handle { background: #1e1f22; border-radius: 4px; }");
 
+    QWidget *contentWidget = new QWidget();
+    contentWidget->setStyleSheet("background-color: transparent;");
+    QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
+    contentLayout->setContentsMargins(100, 20, 100, 40);
+    contentLayout->setSpacing(24);
+
+    QLabel *iconLabel = new QLabel();
+    iconLabel->setPixmap(QPixmap(":/packaging/icon.png").scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    iconLabel->setAlignment(Qt::AlignCenter);
+    contentLayout->addWidget(iconLabel);
+    contentLayout->addSpacing(10);
+
+    QVBoxLayout *nameLayout = new QVBoxLayout();
+    nameLayout->setSpacing(8);
+    QLabel *nameLbl = new QLabel(tr("NAME"));
     m_nameLabel = new QLabel(m_instance.name);
-    QFont nameFont = m_nameLabel->font();
-    nameFont.setBold(true);
-    m_nameLabel->setFont(nameFont);
-    infoForm->addRow(tr("Name:"), m_nameLabel);
+    m_nameLabel->setObjectName("valLabel");
+    nameLayout->addWidget(nameLbl);
+    nameLayout->addWidget(m_nameLabel);
+    contentLayout->addLayout(nameLayout);
 
-    m_currentVersionLabel = new QLabel(
-        m_instance.installedTag.isEmpty() ? tr("Unknown") : m_instance.installedTag);
-    infoForm->addRow(tr("Current Version:"), m_currentVersionLabel);
+    QVBoxLayout *currVerLayout = new QVBoxLayout();
+    currVerLayout->setSpacing(8);
+    QLabel *currVerLbl = new QLabel(tr("CURRENT VERSION"));
+    m_currentVersionLabel = new QLabel(m_instance.installedTag.isEmpty() ? tr("Unknown") : m_instance.installedTag);
+    m_currentVersionLabel->setObjectName("valLabel");
+    currVerLayout->addWidget(currVerLbl);
+    currVerLayout->addWidget(m_currentVersionLabel);
+    contentLayout->addLayout(currVerLayout);
 
-    QLabel *pathLabel = new QLabel(m_instance.installPath);
-    pathLabel->setWordWrap(true);
-    pathLabel->setEnabled(false);
-    infoForm->addRow(tr("Install Path:"), pathLabel);
-
-    mainLayout->addWidget(infoGroup);
-
-    QGroupBox *versionGroup = new QGroupBox(tr("Target Version"));
-    versionGroup->setObjectName("updateVersionGroup");
-    QVBoxLayout *versionLayout = new QVBoxLayout(versionGroup);
-    versionLayout->setSpacing(8);
-
+    QVBoxLayout *targetVerLayout = new QVBoxLayout();
+    targetVerLayout->setSpacing(8);
+    QLabel *targetVerLbl = new QLabel(tr("TARGET VERSION"));
     m_targetVersionCombo = new QComboBox();
     m_targetVersionCombo->setObjectName("targetVersionCombo");
     for (const ReleaseInfo &r : m_releases) {
@@ -75,39 +190,56 @@ void UpdateInstanceDialog::setupUi() {
         if (isCurrent) label += tr(" (current)");
         m_targetVersionCombo->addItem(label, r.tag);
     }
-    versionLayout->addWidget(m_targetVersionCombo);
+    targetVerLayout->addWidget(targetVerLbl);
+    targetVerLayout->addWidget(m_targetVersionCombo);
+    contentLayout->addLayout(targetVerLayout);
+
+    QLabel *pathLabel = new QLabel(tr("Install path: %1").arg(m_instance.installPath));
+    pathLabel->setObjectName("infoLabel");
+    pathLabel->setWordWrap(true);
+    contentLayout->addWidget(pathLabel);
 
     QLabel *noteLabel = new QLabel(tr("Your proton prefix, saves, name, and all settings will be preserved."));
+    noteLabel->setObjectName("infoLabel");
     noteLabel->setWordWrap(true);
-    noteLabel->setEnabled(false);
-    versionLayout->addWidget(noteLabel);
+    contentLayout->addWidget(noteLabel);
 
-    mainLayout->addWidget(versionGroup);
-
+    contentLayout->addStretch();
+    
     m_statusLabel = new QLabel();
     m_statusLabel->setObjectName("updateStatusLabel");
-    mainLayout->addWidget(m_statusLabel);
+    m_statusLabel->setStyleSheet("color: #b9bbbe; text-transform: none; font-weight: normal;");
+    contentLayout->addWidget(m_statusLabel);
 
     m_progressBar = new QProgressBar();
     m_progressBar->setVisible(false);
     m_progressBar->setObjectName("updateProgressBar");
-    mainLayout->addWidget(m_progressBar);
+    m_progressBar->setFixedHeight(4);
+    m_progressBar->setTextVisible(false);
+    m_progressBar->setStyleSheet("QProgressBar { background: #1e1f22; border: none; } QProgressBar::chunk { background: #2e8b57; }");
+    contentLayout->addWidget(m_progressBar);
 
-    mainLayout->addStretch();
+    scrollArea->setWidget(contentWidget);
+    mainLayout->addWidget(scrollArea);
 
-    QHBoxLayout *btnLayout = new QHBoxLayout();
+    QWidget *footerWidget = new QWidget();
+    footerWidget->setStyleSheet("background-color: transparent; border-top: 1px solid rgba(255, 255, 255, 0.05);");
+    QHBoxLayout *btnLayout = new QHBoxLayout(footerWidget);
+    btnLayout->setContentsMargins(60, 20, 60, 30);
+    
     m_cancelBtn = new QPushButton(tr("Cancel"));
     m_cancelBtn->setObjectName("updateCancelBtn");
     m_updateBtn = new QPushButton(tr("Update"));
     m_updateBtn->setObjectName("updateConfirmBtn");
     m_updateBtn->setDefault(true);
+    
     btnLayout->addStretch();
     btnLayout->addWidget(m_cancelBtn);
     btnLayout->addWidget(m_updateBtn);
-    mainLayout->addLayout(btnLayout);
+    mainLayout->addWidget(footerWidget);
 
     connect(m_updateBtn, &QPushButton::clicked, this, &UpdateInstanceDialog::onUpdateClicked);
-    connect(m_cancelBtn, &QPushButton::clicked, this, &QDialog::reject);
+    connect(m_cancelBtn, &QPushButton::clicked, this, [this]{ emit finished(false); });
 
     if (m_releases.isEmpty()) {
         m_updateBtn->setEnabled(false);
@@ -175,7 +307,7 @@ void UpdateInstanceDialog::onDownloadFinished(bool success, QString error) {
     m_statusLabel->setText(tr("Done!"));
     m_progressBar->setVisible(false);
 
-    accept();
+    emit finished(true);
 }
 
 void UpdateInstanceDialog::extractZip(const QString &zipPath, const QString &destDir) {
