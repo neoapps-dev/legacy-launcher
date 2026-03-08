@@ -11,6 +11,7 @@
 #include <QStackedWidget>
 #include <QComboBox>
 #include <QButtonGroup>
+#include <QTextBrowser>
 
 class InstanceManager;
 class ProtonDetector;
@@ -62,6 +63,10 @@ private:
     QComboBox *m_instanceCombo;
     QPushButton *m_playBtn;
     QLabel *m_playStatusLabel;
+
+    // Patch Notes Tab
+    QWidget *m_patchTab;
+    QTextBrowser *m_patchNotesBox;
 
     // Installations Tab
     QWidget *m_installationsTab;

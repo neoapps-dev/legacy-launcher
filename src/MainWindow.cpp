@@ -428,16 +428,10 @@ void MainWindow::setupUi() {
   m_tabGroup->addButton(tabInstallations, 1);
   tabsLayout->addWidget(tabInstallations);
 
-  QPushButton *tabSkins = new QPushButton(tr("Skins"));
-  tabSkins->setObjectName("tabBtn");
-  tabSkins->setCheckable(true);
-  m_tabGroup->addButton(tabSkins, 2);
-  tabsLayout->addWidget(tabSkins);
-  
   QPushButton *tabPatch = new QPushButton(tr("Patch Notes"));
   tabPatch->setObjectName("tabBtn");
   tabPatch->setCheckable(true);
-  m_tabGroup->addButton(tabPatch, 3);
+  m_tabGroup->addButton(tabPatch, 2);
   tabsLayout->addWidget(tabPatch);
   
   tabsLayout->addStretch();
@@ -612,9 +606,17 @@ void MainWindow::setupUi() {
   instLayout->addWidget(m_scrollArea, 1);
   m_mainStack->addWidget(m_installationsTab);
   
-  // Empty dummy tabs for Skins/Patch Notes
-  m_mainStack->addWidget(new QWidget()); // Skins
-  m_mainStack->addWidget(new QWidget()); // Patch Notes
+  // --- PATCH NOTES TAB ---
+  m_patchTab = new QWidget();
+  QVBoxLayout *patchLayout = new QVBoxLayout(m_patchTab);
+  patchLayout->setContentsMargins(40, 30, 40, 30);
+  
+  m_patchNotesBox = new QTextBrowser();
+  m_patchNotesBox->setOpenExternalLinks(true);
+  m_patchNotesBox->setStyleSheet("QTextBrowser { background-color: transparent; color: #dddddd; border: none; font-size: 14px; }");
+  patchLayout->addWidget(m_patchNotesBox);
+  
+  m_mainStack->addWidget(m_patchTab);
 
   rightLayout->addWidget(m_mainStack);
   mainLayout->addWidget(rightArea);
@@ -919,8 +921,18 @@ void MainWindow::onReleasesUpdated(QList<ReleaseInfo> releases) {
             .arg(releases.first().tag)
             .arg(releases.first().publishedAt.toLocalTime().toString(
                 "yyyy-MM-dd")));
+                
+    QString markdown;
+    for (const ReleaseInfo &r : releases) {
+        markdown += QString("## %1 (%2)\n").arg(r.name, r.tag);
+        markdown += QString("*Published: %1*\n\n").arg(r.publishedAt.toLocalTime().toString("yyyy-MM-dd HH:mm"));
+        markdown += r.body;
+        markdown += "\n\n---\n\n";
+    }
+    m_patchNotesBox->setMarkdown(markdown);
   } else {
     statusBar()->showMessage(tr("No releases found."));
+    m_patchNotesBox->setMarkdown("No patch notes found.");
   }
 }
 
