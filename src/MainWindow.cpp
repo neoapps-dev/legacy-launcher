@@ -22,6 +22,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QStackedLayout>
 #include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -29,8 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
       m_launchManager(new LaunchManager(this)),
       m_releaseTracker(new GitHubReleaseTracker(this)) {
   setWindowTitle(tr("Legacy Launcher"));
-  setMinimumSize(1000, 700);
-  resize(1100, 750);
+  setMinimumSize(1000, 600);
 
   m_protons = ProtonDetector::detect();
 
@@ -61,139 +61,155 @@ void MainWindow::applyGlobalStylesheet() {
         background-color: #2b2b2b;
     }
     QWidget#centralPanel {
-        background-color: #1e1e1e;
+        background-color: #2b2b2b;
     }
     
     /* Sidebar */
     QWidget#sidebar {
-        background-color: #212121;
-        border-right: 1px solid #111111;
+        background-color: #232323;
+        border-right: 1px solid #1c1c1c;
     }
     QWidget#userCard {
-        border-bottom: 1px solid #111;
+        border-bottom: none;
     }
     QPushButton#sidebarBtn {
         text-align: left;
-        padding: 12px 20px;
+        padding: 5px 10px 5px 20px;
         background: transparent;
-        color: #aaaaaa;
+        color: #cccccc;
         border: none;
-        font-weight: bold;
-        font-size: 13px;
+        font-weight: normal;
+        font-size: 14px;
         border-left: 4px solid transparent;
+        margin-bottom: 2px;
+        height: 48px;
     }
     QPushButton#sidebarBtn:hover {
         background-color: rgba(255, 255, 255, 0.05);
         color: #ffffff;
     }
     QPushButton#sidebarBtn:checked {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.08);
         color: #ffffff;
-        border-left: 4px solid #4ecdc4;
+        font-weight: bold;
+        border-left: 4px solid #3BA55D;
     }
 
     /* Top Nav (Tabs) */
     QWidget#topNav {
         background-color: #2b2b2b;
-        border-bottom: 2px solid #111111;
+        border-bottom: 2px solid #1c1c1c;
     }
     QPushButton#tabBtn {
         background: transparent;
         border: none;
-        padding: 15px 20px;
-        color: #999999;
-        font-size: 14px;
+        padding: 0px 10px;
+        color: #a0a0a0;
+        font-size: 15px;
         font-weight: bold;
         border-bottom: 3px solid transparent;
+        margin-right: 5px;
     }
     QPushButton#tabBtn:hover {
         color: #ffffff;
-        background-color: rgba(255,255,255,0.02);
     }
     QPushButton#tabBtn:checked {
         color: #ffffff;
-        border-bottom: 3px solid #3c8527;
+        border-bottom: 3px solid #3BA55D;
     }
 
     /* Play Tab */
     QWidget#playTabContent {
-        background-image: url(:/assets/bg.jpg);
-        background-position: center;
-        background-repeat: no-repeat;
-        background-color: #1e1e1e;
+        background-color: #2b2b2b;
     }
     QWidget#playBottomBar {
         background-color: transparent;
         border: none;
-        margin-bottom: 20px;
+        margin-bottom: 0px;
     }
     QWidget#playBottomBarInner {
-        background-color: rgba(30, 30, 30, 240);
-        border-top: 1px solid #111111;
-        border-bottom: 1px solid #111111;
-        border-radius: 4px;
+        background-color: #232323;
+        border-top: 1px solid #1c1c1c;
+        border-bottom: none;
+        border-radius: 0px;
     }
     QComboBox#instanceCombo {
+        color: transparent;
         background-color: transparent;
-        color: #ffffff;
         border: none;
-        padding: 5px 10px;
-        font-size: 13px;
-        font-weight: bold;
+        padding: 0px;
+        outline: none;
+    }
+    QComboBox#instanceCombo:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
     }
     QComboBox#instanceCombo::drop-down {
-        border-left: 1px solid #111;
-        width: 24px;
+        border: none;
+        width: 0px;
     }
     QComboBox#instanceCombo::down-arrow {
         image: none;
-        border-left: 4px solid transparent;
-        border-right: 4px solid transparent;
-        border-top: 4px solid white;
-        width: 0px;
-        height: 0px;
-        margin-right: 8px;
     }
     QComboBox#instanceCombo QAbstractItemView {
-        background-color: #2b2b2b;
+        background-color: #333;
         color: white;
         border: 1px solid #111;
-        selection-background-color: #3e3e3e;
+        selection-background-color: #555;
     }
     QPushButton#playBtn {
-        background-color: #3c8527;
+        background-color: #3C8527;
         color: white;
-        font-size: 24px;
-        font-weight: 800;
-        letter-spacing: 2px;
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 1px;
         padding: 12px 0px;
-        border: 2px solid #111111;
-        border-radius: 4px;
-        min-width: 260px;
+        border-top: 3px solid #4BA631;
+        border-bottom: 4px solid #2B5E1C;
+        border-left: 3px solid #3C8527;
+        border-right: 3px solid #3C8527;
+        border-radius: 2px;
+        min-width: 160px;
+        max-width: 280px;
     }
     QPushButton#playBtn:hover {
-        background-color: #4ba631;
+        background-color: #44962c;
+        border-top: 3px solid #54ba37;
+        border-bottom: 4px solid #306b20;
+        border-left: 3px solid #44962c;
+        border-right: 3px solid #44962c;
     }
     QPushButton#playBtn:pressed {
-        background-color: #316c20;
+        background-color: #2B5E1C;
+        border-top: 4px solid #1a3911;
+        border-bottom: 2px solid #3C8527;
+        padding-top: 14px;
+        padding-bottom: 10px;
     }
     QPushButton#playBtn:disabled {
         background-color: #555555;
         color: #888888;
+        border: 2px solid #444;
     }
     QPushButton#playBtnStop {
-        background-color: #aa0000;
+        background-color: #D32F2F;
         color: white;
-        font-size: 24px;
-        font-weight: 800;
-        letter-spacing: 2px;
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 1px;
         padding: 12px 0px;
-        border: 2px solid #111111;
-        border-radius: 4px;
-        min-width: 260px;
+        border-top: 3px solid #EF5350;
+        border-bottom: 4px solid #B71C1C;
+        border-left: 3px solid #D32F2F;
+        border-right: 3px solid #D32F2F;
+        border-radius: 2px;
+        min-width: 160px;
+        max-width: 280px;
     }
     QPushButton#playBtnStop:hover {
-        background-color: #cc0000;
+        background-color: #E53935;
+        border-top: 3px solid #E57373;
+        border-bottom: 4px solid #C62828;
     }
 
     /* Installations Tab */
@@ -233,7 +249,7 @@ void MainWindow::applyGlobalStylesheet() {
     QFrame#instanceCard {
         background-color: #333333;
         border-radius: 4px;
-        border: 1px solid #111111;
+        border: 1px solid #1c1c1c;
     }
     QFrame#instanceCard:hover {
         background-color: #3a3a3a;
@@ -295,22 +311,32 @@ void MainWindow::setupUi() {
   QWidget *userCard = new QWidget();
   userCard->setObjectName("userCard");
   QHBoxLayout *userCardLayout = new QHBoxLayout(userCard);
-  userCardLayout->setContentsMargins(20, 15, 20, 15);
+  userCardLayout->setContentsMargins(20, 25, 20, 20);
   userCardLayout->setSpacing(12);
 
   QLabel *avatarLabel = new QLabel();
-  avatarLabel->setPixmap(QPixmap(":/assets/icon_profile.jpg").scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  avatarLabel->setPixmap(QPixmap(":/assets/icon_profile.jpg").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
   userCardLayout->addWidget(avatarLabel);
 
   QVBoxLayout *userInfoLayout = new QVBoxLayout();
   userInfoLayout->setSpacing(2);
   
+  QHBoxLayout *nameRow = new QHBoxLayout();
+  nameRow->setContentsMargins(0, 0, 0, 0);
+  nameRow->setSpacing(5);
   QLabel *nameLabel = new QLabel(username);
-  nameLabel->setStyleSheet("color: white; font-weight: bold; font-size: 13px;");
-  userInfoLayout->addWidget(nameLabel);
+  nameLabel->setStyleSheet("color: white; font-weight: bold; font-size: 14px;");
+  nameRow->addWidget(nameLabel);
+  
+  QLabel *chevronLabel = new QLabel("▾");
+  chevronLabel->setStyleSheet("color: #aaaaaa; font-size: 12px;");
+  nameRow->addWidget(chevronLabel);
+  nameRow->addStretch();
+  
+  userInfoLayout->addLayout(nameRow);
 
-  QLabel *accountLabel = new QLabel(tr("Local Account"));
-  accountLabel->setStyleSheet("color: #aaaaaa; font-size: 11px;");
+  QLabel *accountLabel = new QLabel(tr("Microsoft account"));
+  accountLabel->setStyleSheet("color: #aaaaaa; font-size: 12px;");
   userInfoLayout->addWidget(accountLabel);
 
   userCardLayout->addLayout(userInfoLayout);
@@ -321,12 +347,6 @@ void MainWindow::setupUi() {
   // Navigation Links in Sidebar
   m_sidebarGroup = new QButtonGroup(this);
   m_sidebarGroup->setExclusive(true);
-
-  QPushButton *btnNews = new QPushButton(tr("  News"));
-  btnNews->setObjectName("sidebarBtn");
-  btnNews->setCheckable(true);
-  btnNews->setIcon(QIcon(":/assets/icon_news.png"));
-  btnNews->setIconSize(QSize(32, 32));
   
   QPushButton *btnLegacy = new QPushButton(tr("  Minecraft: Legacy Console"));
   btnLegacy->setObjectName("sidebarBtn");
@@ -335,16 +355,16 @@ void MainWindow::setupUi() {
   btnLegacy->setIcon(QIcon(":/packaging/icon.png"));
   btnLegacy->setIconSize(QSize(32, 32));
 
-  m_sidebarGroup->addButton(btnNews, 0);
   m_sidebarGroup->addButton(btnLegacy, 1);
   sidebarLayout->addSpacing(10);
-  sidebarLayout->addWidget(btnNews);
   sidebarLayout->addWidget(btnLegacy);
   sidebarLayout->addStretch();
   
-  QLabel *versionLabel = new QLabel(tr("Settings"));
-  versionLabel->setStyleSheet("color: #666666; font-size: 11px; padding: 15px;");
-  sidebarLayout->addWidget(versionLabel);
+  QPushButton *btnSettings = new QPushButton(tr("  Settings"));
+  btnSettings->setObjectName("sidebarBtn");
+  btnSettings->setCheckable(true);
+  sidebarLayout->addWidget(btnSettings);
+  sidebarLayout->addSpacing(10);
 
   mainLayout->addWidget(sidebar);
 
@@ -356,44 +376,49 @@ void MainWindow::setupUi() {
   // Nav Header
   QWidget *topNav = new QWidget();
   topNav->setObjectName("topNav");
-  topNav->setFixedHeight(55);
-  QHBoxLayout *topNavLayout = new QHBoxLayout(topNav);
-  topNavLayout->setContentsMargins(0, 0, 0, 0);
-  topNavLayout->setSpacing(0);
+  topNav->setFixedHeight(90);
+  QVBoxLayout *topNavLayout = new QVBoxLayout(topNav);
+  topNavLayout->setContentsMargins(20, 15, 20, 0);
+  topNavLayout->setSpacing(10);
 
-  QLabel *gameTitle = new QLabel(tr(" MINECRAFT LEGACY CONSOLE "));
-  gameTitle->setStyleSheet("color: white; font-weight: 900; font-size: 13px; letter-spacing: 1px; padding-left: 20px; padding-right: 20px;");
+  QLabel *gameTitle = new QLabel(tr("MINECRAFT: LEGACY CONSOLE"));
+  gameTitle->setStyleSheet("color: white; font-weight: 800; font-size: 13px; letter-spacing: 0.5px;");
   topNavLayout->addWidget(gameTitle);
 
   m_tabGroup = new QButtonGroup(this);
   m_tabGroup->setExclusive(true);
+
+  QHBoxLayout *tabsLayout = new QHBoxLayout();
+  tabsLayout->setSpacing(0);
 
   QPushButton *tabPlay = new QPushButton(tr("Play"));
   tabPlay->setObjectName("tabBtn");
   tabPlay->setCheckable(true);
   tabPlay->setChecked(true);
   m_tabGroup->addButton(tabPlay, 0);
-  topNavLayout->addWidget(tabPlay);
+  tabsLayout->addWidget(tabPlay);
 
   QPushButton *tabInstallations = new QPushButton(tr("Installations"));
   tabInstallations->setObjectName("tabBtn");
   tabInstallations->setCheckable(true);
   m_tabGroup->addButton(tabInstallations, 1);
-  topNavLayout->addWidget(tabInstallations);
+  tabsLayout->addWidget(tabInstallations);
 
   QPushButton *tabSkins = new QPushButton(tr("Skins"));
   tabSkins->setObjectName("tabBtn");
   tabSkins->setCheckable(true);
   m_tabGroup->addButton(tabSkins, 2);
-  topNavLayout->addWidget(tabSkins);
+  tabsLayout->addWidget(tabSkins);
   
   QPushButton *tabPatch = new QPushButton(tr("Patch Notes"));
   tabPatch->setObjectName("tabBtn");
   tabPatch->setCheckable(true);
   m_tabGroup->addButton(tabPatch, 3);
-  topNavLayout->addWidget(tabPatch);
+  tabsLayout->addWidget(tabPatch);
   
-  topNavLayout->addStretch();
+  tabsLayout->addStretch();
+  topNavLayout->addLayout(tabsLayout);
+  
   rightLayout->addWidget(topNav);
 
   // Stacked Widget covering the rest
@@ -402,13 +427,20 @@ void MainWindow::setupUi() {
   // --- PLAY TAB ---
   m_playTab = new QWidget();
   m_playTab->setObjectName("playTabContent");
+  m_playTab->installEventFilter(this);
+
+  QLabel *bgLabel = new QLabel(m_playTab);
+  bgLabel->setObjectName("bgLabel");
+  bgLabel->lower();
+  bgLabel->show();
+
   QVBoxLayout *playLayout = new QVBoxLayout(m_playTab);
   playLayout->setContentsMargins(0, 0, 0, 0);
   
   QHBoxLayout *logoLayout = new QHBoxLayout();
   logoLayout->setContentsMargins(0, 40, 0, 0);
   QLabel *tabLogo = new QLabel();
-  tabLogo->setPixmap(QPixmap(":/assets/logo.png").scaled(400, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  tabLogo->setPixmap(QPixmap(":/assets/logo.png").scaled(300, 112, Qt::KeepAspectRatio, Qt::SmoothTransformation));
   logoLayout->addStretch();
   logoLayout->addWidget(tabLogo);
   logoLayout->addStretch();
@@ -419,19 +451,62 @@ void MainWindow::setupUi() {
   QWidget *playBottomBar = new QWidget();
   playBottomBar->setObjectName("playBottomBar");
   QVBoxLayout *outerBarLayout = new QVBoxLayout(playBottomBar);
-  outerBarLayout->setContentsMargins(40, 20, 40, 20);
+  outerBarLayout->setContentsMargins(0, 0, 0, 0);
 
   QWidget *innerBar = new QWidget();
   innerBar->setObjectName("playBottomBarInner");
-  innerBar->setFixedHeight(80);
+  innerBar->setFixedHeight(120);
   QHBoxLayout *bottomBarLayout = new QHBoxLayout(innerBar);
   bottomBarLayout->setContentsMargins(20, 0, 20, 0);
   
+  QWidget *versionWidget = new QWidget();
+  versionWidget->setMinimumWidth(140);
+  versionWidget->setMaximumWidth(260);
+  versionWidget->setFixedHeight(60);
+  
+  QStackedLayout *stackLayout = new QStackedLayout(versionWidget);
+  stackLayout->setStackingMode(QStackedLayout::StackAll);
+  
+  QWidget *contentWidget = new QWidget();
+  QHBoxLayout *vLayout = new QHBoxLayout(contentWidget);
+  vLayout->setContentsMargins(10, 5, 10, 5);
+  vLayout->setSpacing(15);
+  
+  QLabel *vIcon = new QLabel();
+  vIcon->setPixmap(QPixmap(":/packaging/icon.png").scaled(40, 40, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  vLayout->addWidget(vIcon);
+  
+  QVBoxLayout *vTextLayout = new QVBoxLayout();
+  vTextLayout->setContentsMargins(0, 5, 0, 5);
+  vTextLayout->setSpacing(2);
+  
+  QLabel *vTitle = new QLabel(tr("Latest release"));
+  vTitle->setObjectName("selectedInstTitle");
+  vTitle->setStyleSheet("color: white; font-weight: bold; font-size: 15px;");
+  vTitle->setMinimumWidth(50);
+  vTextLayout->addWidget(vTitle);
+  
+  QLabel *vText = new QLabel("");
+  vText->setObjectName("selectedInstText");
+  vText->setStyleSheet("color: #aaaaaa; font-size: 13px;");
+  vText->setMinimumWidth(50);
+  vTextLayout->addWidget(vText);
+  
+  vLayout->addLayout(vTextLayout);
+  vLayout->addStretch();
+  
+  QLabel *vChevron = new QLabel("▾");
+  vChevron->setStyleSheet("color: #aaaaaa; font-size: 14px;");
+  vLayout->addWidget(vChevron);
+  
   m_instanceCombo = new QComboBox();
   m_instanceCombo->setObjectName("instanceCombo");
-  m_instanceCombo->setFixedWidth(260);
-  m_instanceCombo->setFixedHeight(50);
-  bottomBarLayout->addWidget(m_instanceCombo);
+  m_instanceCombo->setCursor(Qt::PointingHandCursor);
+  
+  stackLayout->addWidget(contentWidget);
+  stackLayout->addWidget(m_instanceCombo);
+  
+  bottomBarLayout->addWidget(versionWidget, 0, Qt::AlignVCenter);
   
   bottomBarLayout->addStretch(1);
 
@@ -444,7 +519,9 @@ void MainWindow::setupUi() {
 
   m_playStatusLabel = new QLabel(username);
   m_playStatusLabel->setStyleSheet("color: white; font-weight: bold; font-size: 15px; text-align: right;");
-  m_playStatusLabel->setFixedWidth(260);
+  m_playStatusLabel->setMinimumWidth(100);
+  m_playStatusLabel->setMaximumWidth(260);
+  m_playStatusLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
   bottomBarLayout->addWidget(m_playStatusLabel, 0, Qt::AlignRight);
   
   outerBarLayout->addWidget(innerBar);
@@ -530,7 +607,13 @@ void MainWindow::updatePlayButtonState() {
   if (username.isEmpty()) username = qEnvironmentVariable("USERNAME");
   if (username.isEmpty()) username = tr("Player");
 
+  QLabel* instTitle = findChild<QLabel*>("selectedInstTitle");
+  QLabel* instText = findChild<QLabel*>("selectedInstText");
+
   if (m_instanceCombo->count() == 0) {
+    if(instTitle) instTitle->setText(tr("No instances"));
+    if(instText) instText->setText("");
+
     m_playBtn->setEnabled(false);
     m_playBtn->setText(tr("PLAY"));
     m_playBtn->setObjectName("playBtn");
@@ -541,6 +624,18 @@ void MainWindow::updatePlayButtonState() {
   }
   
   QString id = m_instanceCombo->currentData().toString();
+  
+  if (instTitle) instTitle->setText(m_instanceCombo->currentText());
+  if (instText) {
+      Instance *inst = m_instanceManager->findById(id);
+      if (inst) {
+          instText->setText(inst->installedTag.isEmpty() ? tr("Unknown version") : inst->installedTag);
+          if (!inst->username.isEmpty()) {
+              username = inst->username;
+          }
+      }
+  }
+
   if (m_launchManager->isRunning(id)) {
     m_playBtn->setText(tr("STOP"));
     m_playBtn->setObjectName("playBtnStop");
@@ -635,6 +730,21 @@ void MainWindow::updateFocusChain() {
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+  if (obj == m_playTab && event->type() == QEvent::Resize) {
+      QLabel *bgLabel = m_playTab->findChild<QLabel*>("bgLabel");
+      if (bgLabel && !m_playTab->size().isEmpty()) {
+          QSize s = m_playTab->size();
+          bgLabel->resize(s);
+          QPixmap bg(":/assets/bg.jpg");
+          QPixmap scaledBg = bg.scaled(s, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+          
+          int x = (scaledBg.width() - s.width()) / 2;
+          int y = (scaledBg.height() - s.height()) / 2;
+          
+          bgLabel->setPixmap(scaledBg.copy(x, y, s.width(), s.height()));
+      }
+  }
+
   if (event->type() == QEvent::KeyPress) {
     QKeyEvent *ke = static_cast<QKeyEvent *>(event);
     switch (ke->key()) {

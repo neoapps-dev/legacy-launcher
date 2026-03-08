@@ -4,7 +4,6 @@
         <file>assets/bg.jpg</file>
         <file>assets/logo.png</file>
         <file>packaging/icon.png</file>
-        <file>assets/icon_news.png</file>
         <file>assets/icon_profile.jpg</file>
     </qresource>
 </RCC>
