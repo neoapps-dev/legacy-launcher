@@ -21,6 +21,7 @@ set(SOURCES
     src/SettingsDialog.cpp
     src/InstanceWidget.cpp
     src/UpdateInstanceDialog.cpp
+    resources.qrc
 )
 
 set(HEADERS

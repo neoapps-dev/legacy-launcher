@@ -69,6 +69,9 @@ void MainWindow::applyGlobalStylesheet() {
         background-color: #212121;
         border-right: 1px solid #111111;
     }
+    QWidget#userCard {
+        border-bottom: 1px solid #111;
+    }
     QPushButton#sidebarBtn {
         text-align: left;
         padding: 12px 20px;
@@ -114,35 +117,59 @@ void MainWindow::applyGlobalStylesheet() {
 
     /* Play Tab */
     QWidget#playTabContent {
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #113311, stop:1 #1e1e1e);
+        background-image: url(:/assets/bg.jpg);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: #1e1e1e;
     }
     QWidget#playBottomBar {
-        background-color: rgba(30, 30, 30, 220);
+        background-color: transparent;
+        border: none;
+        margin-bottom: 20px;
+    }
+    QWidget#playBottomBarInner {
+        background-color: rgba(30, 30, 30, 240);
         border-top: 1px solid #111111;
         border-bottom: 1px solid #111111;
+        border-radius: 4px;
     }
     QComboBox#instanceCombo {
-        background-color: #333333;
+        background-color: transparent;
         color: #ffffff;
-        border: 1px solid #555555;
-        padding: 8px 12px;
-        font-size: 14px;
+        border: none;
+        padding: 5px 10px;
+        font-size: 13px;
         font-weight: bold;
-        border-radius: 2px;
     }
     QComboBox#instanceCombo::drop-down {
-        border: 0px;
+        border-left: 1px solid #111;
+        width: 24px;
+    }
+    QComboBox#instanceCombo::down-arrow {
+        image: none;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 4px solid white;
+        width: 0px;
+        height: 0px;
+        margin-right: 8px;
+    }
+    QComboBox#instanceCombo QAbstractItemView {
+        background-color: #2b2b2b;
+        color: white;
+        border: 1px solid #111;
+        selection-background-color: #3e3e3e;
     }
     QPushButton#playBtn {
         background-color: #3c8527;
         color: white;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 800;
         letter-spacing: 2px;
-        padding: 12px 60px;
-        border: none;
-        border-radius: 2px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        padding: 12px 0px;
+        border: 2px solid #111111;
+        border-radius: 4px;
+        min-width: 260px;
     }
     QPushButton#playBtn:hover {
         background-color: #4ba631;
@@ -157,12 +184,13 @@ void MainWindow::applyGlobalStylesheet() {
     QPushButton#playBtnStop {
         background-color: #aa0000;
         color: white;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 800;
         letter-spacing: 2px;
-        padding: 12px 60px;
-        border: none;
-        border-radius: 2px;
+        padding: 12px 0px;
+        border: 2px solid #111111;
+        border-radius: 4px;
+        min-width: 260px;
     }
     QPushButton#playBtnStop:hover {
         background-color: #cc0000;
@@ -264,22 +292,48 @@ void MainWindow::setupUi() {
   if (username.isEmpty()) username = qEnvironmentVariable("USERNAME");
   if (username.isEmpty()) username = tr("Player");
   
-  QLabel *profileLabel = new QLabel(tr("\n  %1\n  Local Account").arg(username));
-  profileLabel->setStyleSheet("color: #cccccc; font-size: 11px; padding: 15px; border-bottom: 1px solid #111;");
-  sidebarLayout->addWidget(profileLabel);
+  QWidget *userCard = new QWidget();
+  userCard->setObjectName("userCard");
+  QHBoxLayout *userCardLayout = new QHBoxLayout(userCard);
+  userCardLayout->setContentsMargins(20, 15, 20, 15);
+  userCardLayout->setSpacing(12);
+
+  QLabel *avatarLabel = new QLabel();
+  avatarLabel->setPixmap(QPixmap(":/assets/icon_profile.jpg").scaled(36, 36, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  userCardLayout->addWidget(avatarLabel);
+
+  QVBoxLayout *userInfoLayout = new QVBoxLayout();
+  userInfoLayout->setSpacing(2);
+  
+  QLabel *nameLabel = new QLabel(username);
+  nameLabel->setStyleSheet("color: white; font-weight: bold; font-size: 13px;");
+  userInfoLayout->addWidget(nameLabel);
+
+  QLabel *accountLabel = new QLabel(tr("Local Account"));
+  accountLabel->setStyleSheet("color: #aaaaaa; font-size: 11px;");
+  userInfoLayout->addWidget(accountLabel);
+
+  userCardLayout->addLayout(userInfoLayout);
+  userCardLayout->addStretch();
+
+  sidebarLayout->addWidget(userCard);
 
   // Navigation Links in Sidebar
   m_sidebarGroup = new QButtonGroup(this);
   m_sidebarGroup->setExclusive(true);
 
-  QPushButton *btnNews = new QPushButton(tr("News"));
+  QPushButton *btnNews = new QPushButton(tr("  News"));
   btnNews->setObjectName("sidebarBtn");
   btnNews->setCheckable(true);
+  btnNews->setIcon(QIcon(":/assets/icon_news.png"));
+  btnNews->setIconSize(QSize(32, 32));
   
-  QPushButton *btnLegacy = new QPushButton(tr("Minecraft: Legacy Console"));
+  QPushButton *btnLegacy = new QPushButton(tr("  Minecraft: Legacy Console"));
   btnLegacy->setObjectName("sidebarBtn");
   btnLegacy->setCheckable(true);
   btnLegacy->setChecked(true);
+  btnLegacy->setIcon(QIcon(":/packaging/icon.png"));
+  btnLegacy->setIconSize(QSize(32, 32));
 
   m_sidebarGroup->addButton(btnNews, 0);
   m_sidebarGroup->addButton(btnLegacy, 1);
@@ -350,32 +404,50 @@ void MainWindow::setupUi() {
   m_playTab->setObjectName("playTabContent");
   QVBoxLayout *playLayout = new QVBoxLayout(m_playTab);
   playLayout->setContentsMargins(0, 0, 0, 0);
+  
+  QHBoxLayout *logoLayout = new QHBoxLayout();
+  logoLayout->setContentsMargins(0, 40, 0, 0);
+  QLabel *tabLogo = new QLabel();
+  tabLogo->setPixmap(QPixmap(":/assets/logo.png").scaled(400, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  logoLayout->addStretch();
+  logoLayout->addWidget(tabLogo);
+  logoLayout->addStretch();
+  playLayout->addLayout(logoLayout);
+
   playLayout->addStretch();
   
   QWidget *playBottomBar = new QWidget();
   playBottomBar->setObjectName("playBottomBar");
-  QHBoxLayout *bottomBarLayout = new QHBoxLayout(playBottomBar);
-  bottomBarLayout->setContentsMargins(40, 20, 40, 20);
+  QVBoxLayout *outerBarLayout = new QVBoxLayout(playBottomBar);
+  outerBarLayout->setContentsMargins(40, 20, 40, 20);
+
+  QWidget *innerBar = new QWidget();
+  innerBar->setObjectName("playBottomBarInner");
+  innerBar->setFixedHeight(80);
+  QHBoxLayout *bottomBarLayout = new QHBoxLayout(innerBar);
+  bottomBarLayout->setContentsMargins(20, 0, 20, 0);
   
   m_instanceCombo = new QComboBox();
   m_instanceCombo->setObjectName("instanceCombo");
-  m_instanceCombo->setFixedWidth(280);
-  m_instanceCombo->setFixedHeight(45);
+  m_instanceCombo->setFixedWidth(260);
+  m_instanceCombo->setFixedHeight(50);
   bottomBarLayout->addWidget(m_instanceCombo);
   
-  bottomBarLayout->addStretch();
+  bottomBarLayout->addStretch(1);
 
   m_playBtn = new QPushButton(tr("PLAY"));
   m_playBtn->setObjectName("playBtn");
   m_playBtn->setCursor(Qt::PointingHandCursor);
-  bottomBarLayout->addWidget(m_playBtn);
+  bottomBarLayout->addWidget(m_playBtn, 0, Qt::AlignCenter);
   
-  bottomBarLayout->addStretch();
+  bottomBarLayout->addStretch(1);
 
-  m_playStatusLabel = new QLabel("");
-  m_playStatusLabel->setStyleSheet("color: white; font-weight: bold; width: 280px; text-align: right;");
-  bottomBarLayout->addWidget(m_playStatusLabel);
+  m_playStatusLabel = new QLabel(username);
+  m_playStatusLabel->setStyleSheet("color: white; font-weight: bold; font-size: 15px; text-align: right;");
+  m_playStatusLabel->setFixedWidth(260);
+  bottomBarLayout->addWidget(m_playStatusLabel, 0, Qt::AlignRight);
   
+  outerBarLayout->addWidget(innerBar);
   playLayout->addWidget(playBottomBar);
   m_mainStack->addWidget(m_playTab);
 
@@ -454,6 +526,10 @@ void MainWindow::onPlayButtonClicked() {
 }
 
 void MainWindow::updatePlayButtonState() {
+  QString username = qEnvironmentVariable("USER");
+  if (username.isEmpty()) username = qEnvironmentVariable("USERNAME");
+  if (username.isEmpty()) username = tr("Player");
+
   if (m_instanceCombo->count() == 0) {
     m_playBtn->setEnabled(false);
     m_playBtn->setText(tr("PLAY"));
@@ -468,11 +544,11 @@ void MainWindow::updatePlayButtonState() {
   if (m_launchManager->isRunning(id)) {
     m_playBtn->setText(tr("STOP"));
     m_playBtn->setObjectName("playBtnStop");
-    m_playStatusLabel->setText(tr("Game is running..."));
+    m_playStatusLabel->setText(tr("Playing as\n%1").arg(username));
   } else {
     m_playBtn->setText(tr("PLAY"));
     m_playBtn->setObjectName("playBtn");
-    m_playStatusLabel->setText("");
+    m_playStatusLabel->setText(username);
   }
   m_playBtn->setEnabled(true);
   
