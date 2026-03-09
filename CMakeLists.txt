@@ -37,7 +37,7 @@ set(HEADERS
     include/Types.h
 )
 
-add_executable(legacy-launcher ${SOURCES} ${HEADERS})
+add_executable(legacy-launcher ${SOURCES} ${HEADERS} resources.qrc)
 
 target_include_directories(legacy-launcher PRIVATE include)
 

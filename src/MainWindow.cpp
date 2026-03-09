@@ -83,13 +83,34 @@ void MainWindow::setupUi() {
   QVBoxLayout *headerBlock = new QVBoxLayout();
   headerBlock->setSpacing(4);
 
+  QHBoxLayout *headerTop = new QHBoxLayout();
+  headerTop->setSpacing(16);
+
+  QLabel *logoLabel = new QLabel();
+  QPixmap logoPixmap(":/packaging/icon.png");
+  if (!logoPixmap.isNull()) {
+    logoPixmap = logoPixmap.scaled(50, 50, Qt::KeepAspectRatio,
+                                   Qt::SmoothTransformation);
+    logoLabel->setPixmap(logoPixmap);
+  }
+  logoLabel->setFixedSize(50, 50);
+  headerTop->addWidget(logoLabel);
+
+  QVBoxLayout *titleBlock = new QVBoxLayout();
+  titleBlock->setSpacing(4);
+
   QLabel *titleLabel = new QLabel(tr("Legacy Launcher"));
   titleLabel->setObjectName("headerTitle");
-  headerBlock->addWidget(titleLabel);
+  titleBlock->addWidget(titleLabel);
 
   QLabel *subtitleLabel = new QLabel(tr("Minecraft Legacy Console Edition"));
   subtitleLabel->setObjectName("headerSubtitle");
-  headerBlock->addWidget(subtitleLabel);
+  titleBlock->addWidget(subtitleLabel);
+
+  titleBlock->addStretch();
+  headerTop->addLayout(titleBlock);
+
+  headerBlock->addLayout(headerTop);
 
   rootLayout->addLayout(headerBlock);
   rootLayout->addSpacing(20);
