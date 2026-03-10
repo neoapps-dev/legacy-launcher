@@ -122,7 +122,7 @@ void MainWindow::setupUi() {
   
   userInfoLayout->addLayout(nameRow);
 
-  QLabel *accountLabel = new QLabel(tr("Microsoft account"));
+  QLabel *accountLabel = new QLabel(tr("Local account"));
   accountLabel->setStyleSheet("color: #aaaaaa; font-size: 12px;");
   userInfoLayout->addWidget(accountLabel);
 
