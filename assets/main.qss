@@ -124,16 +124,24 @@ QWidget#playBottomBarInner {
     border-radius: 0px;
 }
 
+QFrame#instanceSelector {
+    background-color: transparent;
+    border-radius: 4px;
+    margin: 4px;
+}
+QFrame#instanceSelector:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+QFrame#instanceSelector:pressed {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
 QComboBox#instanceCombo {
     color: transparent;
     background-color: transparent;
     border: none;
     padding: 0px;
     outline: none;
-}
-QComboBox#instanceCombo:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
 }
 QComboBox#instanceCombo::drop-down {
     border: none;

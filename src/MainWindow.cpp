@@ -295,20 +295,20 @@ void MainWindow::setupUi() {
   QHBoxLayout *bottomBarLayout = new QHBoxLayout(innerBarBg);
   bottomBarLayout->setContentsMargins(20, 0, 20, 0);
   
-  m_instanceCombo = new QComboBox();
+  m_instanceSelector = new QFrame();
+  m_instanceSelector->setObjectName("instanceSelector");
+  m_instanceSelector->setCursor(Qt::PointingHandCursor);
+  m_instanceSelector->setFixedSize(280, 64);
+  m_instanceSelector->installEventFilter(this);
+
+  m_instanceCombo = new QComboBox(m_instanceSelector);
   m_instanceCombo->setObjectName("instanceCombo");
-  m_instanceCombo->setCursor(Qt::PointingHandCursor);
-  m_instanceCombo->installEventFilter(this);
-  m_instanceCombo->setMinimumWidth(240);
-  m_instanceCombo->setMaximumWidth(320);
-  m_instanceCombo->setFixedHeight(60);
-  m_instanceCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  m_instanceCombo->setGeometry(0, 0, 280, 64);
+  m_instanceCombo->setFocusPolicy(Qt::NoFocus);
   
-  QWidget *contentWidget = new QWidget(m_instanceCombo);
-  contentWidget->setAttribute(Qt::WA_TransparentForMouseEvents);
-  QHBoxLayout *vLayout = new QHBoxLayout(contentWidget);
-  vLayout->setContentsMargins(10, 5, 10, 5);
-  vLayout->setSpacing(10);
+  QHBoxLayout *vLayout = new QHBoxLayout(m_instanceSelector);
+  vLayout->setContentsMargins(12, 0, 12, 0);
+  vLayout->setSpacing(12);
   
   QLabel *vIcon = new QLabel();
   vIcon->setPixmap(QPixmap(":/packaging/icon.png").scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -339,11 +339,9 @@ void MainWindow::setupUi() {
   vLayout->addWidget(vChevron);
   
   vLayout->addStretch();
-  m_instanceCombo->setLayout(new QVBoxLayout());
-  m_instanceCombo->layout()->setContentsMargins(0, 0, 0, 0);
-  m_instanceCombo->layout()->addWidget(contentWidget);
+  vLayout->addWidget(vChevron);
   
-  bottomBarLayout->addWidget(m_instanceCombo, 0, Qt::AlignVCenter);
+  bottomBarLayout->addWidget(m_instanceSelector, 0, Qt::AlignVCenter);
   bottomBarLayout->addStretch(1);
 
   m_playStatusLabel = new QLabel(username);
@@ -645,8 +643,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
       }
   }
 
-  if (obj == m_instanceCombo && event->type() == QEvent::MouseButtonPress) {
-      m_instanceCombo->showPopup();
+  if ((obj == m_instanceCombo || obj == m_instanceSelector) && 
+      (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonRelease)) {
+      if (event->type() == QEvent::MouseButtonRelease) {
+          m_instanceCombo->showPopup();
+      }
       return true;
   }
 

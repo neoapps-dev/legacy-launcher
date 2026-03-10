@@ -67,6 +67,7 @@ private:
 
     // Play Tab
     QWidget *m_playTab;
+    QFrame *m_instanceSelector;
     QComboBox *m_instanceCombo;
     QPushButton *m_playBtn;
     QLabel *m_playStatusLabel;
