@@ -4,6 +4,10 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
+#include <QGraphicsDropShadowEffect>
+#include <QPropertyAnimation>
+#include <QFrame>
+#include <QVBoxLayout>
 
 class InstanceWidget : public QWidget {
     Q_OBJECT
@@ -23,6 +27,10 @@ signals:
     void updateRequested(QString id);
     void deleteRequested(QString id);
 
+protected:
+    void enterEvent(QEnterEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+
 private:
     Instance m_instance;
     bool m_running;
@@ -37,6 +45,12 @@ private:
     QPushButton *m_settingsBtn;
     QPushButton *m_updateBtn;
     QPushButton *m_deleteBtn;
+
+    QGraphicsDropShadowEffect *m_shadow;
+    QPropertyAnimation *m_blurAnim;
+    QPropertyAnimation *m_offsetAnim;
+    QFrame *m_card;
+    QVBoxLayout *m_rootLayout;
 
     void setupUi();
     void refresh();

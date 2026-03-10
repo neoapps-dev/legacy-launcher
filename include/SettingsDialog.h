@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Types.h"
-#include <QDialog>
+#include <QWidget>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QSpinBox>
@@ -11,12 +11,15 @@
 
 class WeaveLoaderReleaseTracker;
 
-class SettingsDialog : public QDialog {
+class SettingsDialog : public QWidget {
     Q_OBJECT
 public:
     explicit SettingsDialog(Instance instance, const QList<ProtonInstallation> &protons, QWidget *parent = nullptr);
 
     Instance updatedInstance() const;
+
+signals:
+    void finished(bool accepted);
 
 private slots:
     void onAccept();

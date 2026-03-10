@@ -1,6 +1,10 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/">
+        <file>assets/bg.jpg</file>
+        <file>assets/logo.png</file>
+        <file>assets/icon_profile.jpg</file>
         <file>packaging/icon.png</file>
+        <file>assets/main.qss</file>
     </qresource>
 </RCC>

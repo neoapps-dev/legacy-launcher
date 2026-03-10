@@ -7,15 +7,23 @@
 #include <QGroupBox>
 #include <QDialogButtonBox>
 #include <QLabel>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QSpinBox>
+#include <QPushButton>
+#include <QScrollArea>
 
 SettingsDialog::SettingsDialog(Instance instance, const QList<ProtonInstallation> &protons, QWidget *parent)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_instance(instance)
     , m_protons(protons)
     , m_weaveLoaderTracker(new WeaveLoaderReleaseTracker(this))
 {
-    setWindowTitle(tr("Instance Settings — %1").arg(instance.name));
-    setMinimumWidth(500);
+    setObjectName("settingsPage");
+    setWindowTitle(tr("Edit installation"));
+    setMinimumWidth(700);
+    setAttribute(Qt::WA_StyledBackground);
     setupUi();
 
     connect(m_weaveLoaderTracker, &WeaveLoaderReleaseTracker::releasesUpdated, this, &SettingsDialog::onWeaveLoaderReleasesUpdated);
@@ -25,17 +33,70 @@ SettingsDialog::SettingsDialog(Instance instance, const QList<ProtonInstallation
 }
 
 void SettingsDialog::setupUi() {
+
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    QFormLayout *form = new QFormLayout();
+    QWidget *headerWidget = new QWidget();
+    QHBoxLayout *headerLayout = new QHBoxLayout(headerWidget);
+    headerLayout->setContentsMargins(40, 40, 40, 10);
+    
+    headerLayout->addStretch();
+    QLabel *titleLabel = new QLabel(tr("Edit installation"));
+    titleLabel->setObjectName("titleLabel");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    headerLayout->addWidget(titleLabel, 0, Qt::AlignCenter);
+    headerLayout->addStretch();
+    
+    QPushButton *closeBtn = new QPushButton("✕");
+    closeBtn->setObjectName("closeBtn");
+    closeBtn->setFixedSize(32, 32);
+    connect(closeBtn, &QPushButton::clicked, this, [this]{ emit finished(false); });
+    headerLayout->addWidget(closeBtn);
+    
+    mainLayout->addWidget(headerWidget);
 
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    scrollArea->setObjectName("settingsScrollArea");
+
+    QWidget *contentWidget = new QWidget();
+    contentWidget->setObjectName("contentWidget");
+    QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
+    contentLayout->setContentsMargins(100, 20, 100, 40);
+    contentLayout->setSpacing(24);
+
+    QLabel *iconLabel = new QLabel();
+    iconLabel->setPixmap(QPixmap(":/packaging/icon.png").scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    iconLabel->setAlignment(Qt::AlignCenter);
+    contentLayout->addWidget(iconLabel);
+    contentLayout->addSpacing(10);
+
+    QVBoxLayout *nameLayout = new QVBoxLayout();
+    nameLayout->setSpacing(4);
+    QLabel *nameLbl = new QLabel(tr("NAME"));
+    nameLbl->setObjectName("formLabel");
     m_nameEdit = new QLineEdit(m_instance.name);
-    form->addRow(tr("Name:"), m_nameEdit);
+    nameLayout->addWidget(nameLbl);
+    nameLayout->addWidget(m_nameEdit);
+    contentLayout->addLayout(nameLayout);
 
+    QVBoxLayout *userLayout = new QVBoxLayout();
+    userLayout->setSpacing(4);
+    QLabel *userLbl = new QLabel(tr("USERNAME"));
+    userLbl->setObjectName("formLabel");
     m_usernameEdit = new QLineEdit(m_instance.username);
     m_usernameEdit->setPlaceholderText(tr("Player"));
-    form->addRow(tr("Username:"), m_usernameEdit);
+    userLayout->addWidget(userLbl);
+    userLayout->addWidget(m_usernameEdit);
+    contentLayout->addLayout(userLayout);
 
+    QVBoxLayout *protonLayout = new QVBoxLayout();
+    protonLayout->setSpacing(4);
+    QLabel *protonLbl = new QLabel(tr("PROTON"));
+    protonLbl->setObjectName("formLabel");
     m_protonCombo = new QComboBox();
     int selectedProton = 0;
     for (int i = 0; i < m_protons.size(); ++i) {
@@ -48,59 +109,89 @@ void SettingsDialog::setupUi() {
     } else {
         m_protonCombo->setCurrentIndex(selectedProton);
     }
-    form->addRow(tr("Proton:"), m_protonCombo);
+    protonLayout->addWidget(protonLbl);
+    protonLayout->addWidget(m_protonCombo);
+    contentLayout->addLayout(protonLayout);
 
-    mainLayout->addLayout(form);
-
-    QGroupBox *serverGroup = new QGroupBox(tr("Server / Headless"));
-    QVBoxLayout *serverLayout = new QVBoxLayout(serverGroup);
-    QFormLayout *serverForm = new QFormLayout();
-
+    QVBoxLayout *headlessLayout = new QVBoxLayout();
+    headlessLayout->setSpacing(4);
+    QLabel *headlessLbl = new QLabel(tr("HEADLESS / SERVER MODE"));
+    headlessLbl->setObjectName("formLabel");
+    headlessLayout->addWidget(headlessLbl);
     m_headlessCheck = new QCheckBox(tr("Enable headless / server mode (-server)"));
     m_headlessCheck->setChecked(m_instance.headlessMode);
-    serverLayout->addWidget(m_headlessCheck);
+    m_headlessCheck->setObjectName("headlessCheck");
+    headlessLayout->addWidget(m_headlessCheck);
+    contentLayout->addLayout(headlessLayout);
 
+    QVBoxLayout *ipLayout = new QVBoxLayout();
+    ipLayout->setSpacing(4);
+    QLabel *ipLbl = new QLabel(tr("AUTO-CONNECT IP"));
+    ipLbl->setObjectName("formLabel");
     m_ipEdit = new QLineEdit(m_instance.autoIp);
     m_ipEdit->setPlaceholderText(tr("Leave blank to disable auto-connect"));
-    serverForm->addRow(tr("Auto-connect IP:"), m_ipEdit);
+    ipLayout->addWidget(ipLbl);
+    ipLayout->addWidget(m_ipEdit);
+    contentLayout->addLayout(ipLayout);
 
+    QVBoxLayout *portLayout = new QVBoxLayout();
+    portLayout->setSpacing(4);
+    QLabel *portLbl = new QLabel(tr("AUTO-CONNECT PORT"));
+    portLbl->setObjectName("formLabel");
     m_portSpin = new QSpinBox();
     m_portSpin->setRange(0, 65535);
     m_portSpin->setValue(m_instance.autoPort);
     m_portSpin->setSpecialValueText(tr("None"));
-    serverForm->addRow(tr("Auto-connect Port:"), m_portSpin);
+    portLayout->addWidget(portLbl);
+    portLayout->addWidget(m_portSpin);
+    contentLayout->addLayout(portLayout);
 
-    serverLayout->addLayout(serverForm);
-    mainLayout->addWidget(serverGroup);
-
-    QGroupBox *weaveGroup = new QGroupBox(tr("Weave Loader"));
-    QVBoxLayout *weaveLayout = new QVBoxLayout(weaveGroup);
+    QVBoxLayout *weaveLayoutSection = new QVBoxLayout();
+    weaveLayoutSection->setSpacing(4);
+    QLabel *weaveLbl = new QLabel(tr("WEAVE LOADER"));
+    weaveLbl->setObjectName("formLabel");
+    weaveLayoutSection->addWidget(weaveLbl);
 
     m_weaveLoaderCheck = new QCheckBox(tr("Enable Weave Loader"));
     m_weaveLoaderCheck->setChecked(m_instance.weaveLoaderEnabled);
-    weaveLayout->addWidget(m_weaveLoaderCheck);
+    weaveLayoutSection->addWidget(m_weaveLoaderCheck);
 
     m_weaveLoaderCombo = new QComboBox();
-    m_weaveLoaderCombo->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed);
-    weaveLayout->addWidget(m_weaveLoaderCombo);
+    weaveLayoutSection->addWidget(m_weaveLoaderCombo);
 
     m_weaveLoaderStatusLabel = new QLabel(tr("Fetching versions..."));
-    m_weaveLoaderStatusLabel->setEnabled(false);
-    weaveLayout->addWidget(m_weaveLoaderStatusLabel);
+    weaveLayoutSection->addWidget(m_weaveLoaderStatusLabel);
+    contentLayout->addLayout(weaveLayoutSection);
 
     connect(m_weaveLoaderCheck, &QCheckBox::stateChanged, this, &SettingsDialog::onWeaveLoaderCheckChanged);
 
-    mainLayout->addWidget(weaveGroup);
-
     QLabel *pathLabel = new QLabel(tr("Install path: %1").arg(m_instance.installPath));
-    pathLabel->setEnabled(false);
+    pathLabel->setObjectName("infoLabel");
     pathLabel->setWordWrap(true);
-    mainLayout->addWidget(pathLabel);
+    contentLayout->addWidget(pathLabel);
 
-    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(buttons, &QDialogButtonBox::accepted, this, &SettingsDialog::onAccept);
-    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    mainLayout->addWidget(buttons);
+    contentLayout->addStretch();
+    scrollArea->setWidget(contentWidget);
+    mainLayout->addWidget(scrollArea);
+
+    QWidget *footerWidget = new QWidget();
+    footerWidget->setObjectName("modalFooter");
+    QHBoxLayout *btnLayout = new QHBoxLayout(footerWidget);
+    btnLayout->setContentsMargins(60, 20, 60, 30);
+    
+    QPushButton *cancelBtn = new QPushButton(tr("Cancel"));
+    cancelBtn->setObjectName("cancelBtn");
+    QPushButton *saveBtn = new QPushButton(tr("Save"));
+    saveBtn->setObjectName("saveBtn");
+    saveBtn->setDefault(true);
+    
+    btnLayout->addStretch();
+    btnLayout->addWidget(cancelBtn);
+    btnLayout->addWidget(saveBtn);
+    mainLayout->addWidget(footerWidget);
+
+    connect(saveBtn, &QPushButton::clicked, this, &SettingsDialog::onAccept);
+    connect(cancelBtn, &QPushButton::clicked, this, [this]{ emit finished(false); });
 }
 
 void SettingsDialog::onAccept() {
@@ -114,7 +205,6 @@ void SettingsDialog::onAccept() {
     if (idx >= 0 && idx < m_protons.size()) {
         m_instance.protonId = m_protons[idx].path;
     }
-
     bool wasEnabled = m_instance.weaveLoaderEnabled;
     m_instance.weaveLoaderEnabled = m_weaveLoaderCheck->isChecked();
 
@@ -132,8 +222,7 @@ void SettingsDialog::onAccept() {
         m_instance.weaveLoaderTag = "";
         m_instance.weaveLoaderInstalledAt = QDateTime();
     }
-
-    accept();
+    emit finished(true);
 }
 
 void SettingsDialog::onWeaveLoaderReleasesUpdated(QList<ReleaseInfo> releases) {

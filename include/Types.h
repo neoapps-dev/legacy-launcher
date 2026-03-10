@@ -15,6 +15,7 @@ struct ReleaseInfo {
     QString name;
     QDateTime publishedAt;
     QString downloadUrl;
+    QString body;
     bool isNightly;
 };
 

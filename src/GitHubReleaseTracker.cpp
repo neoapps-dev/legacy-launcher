@@ -49,6 +49,7 @@ ReleaseInfo GitHubReleaseTracker::parseRelease(const QJsonObject &obj) {
     ReleaseInfo r;
     r.tag = obj["tag_name"].toString();
     r.name = obj["name"].toString();
+    r.body = obj["body"].toString();
     r.publishedAt = QDateTime::fromString(obj["published_at"].toString(), Qt::ISODate);
     r.isNightly = isNightlyRelease(r.tag, r.name);
 

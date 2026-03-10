@@ -9,6 +9,13 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QFileDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QPushButton>
+#include <QPushButton>
+#include <QProgressBar>
+#include <QScrollArea>
 #include <QMessageBox>
 #include <QUuid>
 #include <QDir>
@@ -20,7 +27,7 @@
 #include <QCoreApplication>
 
 AddInstanceDialog::AddInstanceDialog(const QList<ProtonInstallation> &protons, QWidget *parent)
-    : QDialog(parent)
+    : QWidget(parent)
     , m_protons(protons)
     , m_tracker(new GitHubReleaseTracker(this))
     , m_weaveLoaderTracker(new WeaveLoaderReleaseTracker(this))
@@ -28,8 +35,10 @@ AddInstanceDialog::AddInstanceDialog(const QList<ProtonInstallation> &protons, Q
     , m_downloadingWeaveLoader(false)
     , m_installingDotNet(false)
 {
+    setObjectName("addInstancePage");
     setWindowTitle(tr("Add Instance"));
     setMinimumWidth(700);
+    setAttribute(Qt::WA_StyledBackground);
     setupUi();
 
     connect(m_tracker, &GitHubReleaseTracker::releasesUpdated, this, &AddInstanceDialog::onReleasesUpdated);
@@ -47,26 +56,90 @@ AddInstanceDialog::AddInstanceDialog(const QList<ProtonInstallation> &protons, Q
 }
 
 void AddInstanceDialog::setupUi() {
+
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    QFormLayout *form = new QFormLayout();
+    QWidget *headerWidget = new QWidget();
+    QHBoxLayout *headerLayout = new QHBoxLayout(headerWidget);
+    headerLayout->setContentsMargins(40, 40, 40, 10);
+    
+    headerLayout->addStretch();
+    QLabel *titleLabel = new QLabel(tr("Create new installation"));
+    titleLabel->setObjectName("titleLabel");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    headerLayout->addWidget(titleLabel, 0, Qt::AlignCenter);
+    headerLayout->addStretch();
+    
+    QPushButton *closeBtn = new QPushButton("✕");
+    closeBtn->setObjectName("closeBtn");
+    closeBtn->setFixedSize(32, 32);
+    connect(closeBtn, &QPushButton::clicked, this, [this]{ emit finished(false); });
+    headerLayout->addWidget(closeBtn);
+    
+    mainLayout->addWidget(headerWidget);
 
-    m_nameEdit = new QLineEdit(tr("My Instance"));
-    form->addRow(tr("Instance Name:"), m_nameEdit);
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    scrollArea->setObjectName("addInstanceScrollArea");
+    
+    QWidget *contentWidget = new QWidget();
+    contentWidget->setObjectName("contentWidget");
+    QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
+    contentLayout->setContentsMargins(100, 20, 100, 40);
+    contentLayout->setSpacing(24);
 
+    QLabel *iconLabel = new QLabel();
+    iconLabel->setPixmap(QPixmap(":/packaging/icon.png").scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    iconLabel->setAlignment(Qt::AlignCenter);
+    contentLayout->addWidget(iconLabel);
+    contentLayout->addSpacing(10);
+
+    QVBoxLayout *nameLayout = new QVBoxLayout();
+    nameLayout->setSpacing(4);
+    QLabel *nameLbl = new QLabel(tr("NAME"));
+    nameLbl->setObjectName("formLabel");
+    m_nameEdit = new QLineEdit();
+    m_nameEdit->setText(tr("unnamed installation"));
+    nameLayout->addWidget(nameLbl);
+    nameLayout->addWidget(m_nameEdit);
+    contentLayout->addLayout(nameLayout);
+
+    QVBoxLayout *verLayout = new QVBoxLayout();
+    verLayout->setSpacing(4);
+    QLabel *verLbl = new QLabel(tr("VERSION"));
+    verLbl->setObjectName("formLabel");
+    m_releaseCombo = new QComboBox();
+    verLayout->addWidget(verLbl);
+    verLayout->addWidget(m_releaseCombo);
+    contentLayout->addLayout(verLayout);
+
+    QVBoxLayout *pathContainerLayout = new QVBoxLayout();
+    pathContainerLayout->setSpacing(4);
+    QLabel *pathLbl = new QLabel(tr("GAME DIRECTORY"));
+    pathLbl->setObjectName("formLabel");
+    pathContainerLayout->addWidget(pathLbl);
+    
     QHBoxLayout *pathLayout = new QHBoxLayout();
+    pathLayout->setSpacing(0);
     m_installPathEdit = new QLineEdit();
-    m_installPathEdit->setPlaceholderText(
-        QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.local/share/LegacyLauncher/instances/");
-    m_browseBtn = new QPushButton(tr("Browse..."));
+    m_installPathEdit->setPlaceholderText(tr("<Use default directory>"));
+    m_installPathEdit->setObjectName("pathEdit");
+    m_browseBtn = new QPushButton(tr("BROWSE"));
+    m_browseBtn->setObjectName("browseBtn");
+    m_browseBtn->setCursor(Qt::PointingHandCursor);
+    m_browseBtn->setFixedHeight(m_nameEdit->sizeHint().height());
     pathLayout->addWidget(m_installPathEdit);
     pathLayout->addWidget(m_browseBtn);
-    form->addRow(tr("Install Path:"), pathLayout);
+    pathContainerLayout->addLayout(pathLayout);
+    contentLayout->addLayout(pathContainerLayout);
 
-    m_releaseCombo = new QComboBox();
-    m_releaseCombo->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed);
-    form->addRow(tr("Version:"), m_releaseCombo);
-
+    QVBoxLayout *protonLayout = new QVBoxLayout();
+    protonLayout->setSpacing(4);
+    QLabel *protonLbl = new QLabel(tr("PROTON"));
+    protonLbl->setObjectName("formLabel");
     m_protonCombo = new QComboBox();
     for (const ProtonInstallation &p : m_protons) {
         m_protonCombo->addItem(p.name, p.path);
@@ -75,47 +148,70 @@ void AddInstanceDialog::setupUi() {
         m_protonCombo->addItem(tr("No Proton installations found"));
         m_protonCombo->setEnabled(false);
     }
-    form->addRow(tr("Proton:"), m_protonCombo);
+    protonLayout->addWidget(protonLbl);
+    protonLayout->addWidget(m_protonCombo);
+    contentLayout->addLayout(protonLayout);
 
+    QVBoxLayout *userLayout = new QVBoxLayout();
+    userLayout->setSpacing(4);
+    QLabel *userLbl = new QLabel(tr("USERNAME"));
+    userLbl->setObjectName("formLabel");
     m_usernameEdit = new QLineEdit();
     m_usernameEdit->setPlaceholderText(tr("Player"));
-    form->addRow(tr("Username:"), m_usernameEdit);
-
-    QGroupBox *weaveGroup = new QGroupBox(tr("Weave Loader (Optional)"));
-    QVBoxLayout *weaveLayout = new QVBoxLayout(weaveGroup);
+    userLayout->addWidget(userLbl);
+    userLayout->addWidget(m_usernameEdit);
+    contentLayout->addLayout(userLayout);
+    
+    QVBoxLayout *weaveLayoutSection = new QVBoxLayout();
+    weaveLayoutSection->setSpacing(4);
+    QLabel *weaveLbl = new QLabel(tr("WEAVE LOADER (OPTIONAL)"));
+    weaveLbl->setObjectName("formLabel");
+    weaveLayoutSection->addWidget(weaveLbl);
 
     m_weaveLoaderCheck = new QCheckBox(tr("Enable Weave Loader"));
-    m_weaveLoaderCheck->setChecked(false);
-    weaveLayout->addWidget(m_weaveLoaderCheck);
+    m_weaveLoaderCheck->setObjectName("weaveCheck");
+    weaveLayoutSection->addWidget(m_weaveLoaderCheck);
 
     m_weaveLoaderCombo = new QComboBox();
-    m_weaveLoaderCombo->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed);
-    weaveLayout->addWidget(m_weaveLoaderCombo);
+    m_weaveLoaderCombo->setEnabled(false);
+    weaveLayoutSection->addWidget(m_weaveLoaderCombo);
+    contentLayout->addLayout(weaveLayoutSection);
 
     connect(m_weaveLoaderCheck, &QCheckBox::stateChanged, this, &AddInstanceDialog::onWeaveLoaderCheckChanged);
 
-    mainLayout->addLayout(form);
-    mainLayout->addWidget(weaveGroup);
-
     m_statusLabel = new QLabel();
-    mainLayout->addWidget(m_statusLabel);
+    m_statusLabel->setObjectName("statusLabel");
+    contentLayout->addWidget(m_statusLabel);
 
     m_progressBar = new QProgressBar();
     m_progressBar->setVisible(false);
-    mainLayout->addWidget(m_progressBar);
+    m_progressBar->setObjectName("installProgressBar");
+    m_progressBar->setFixedHeight(4);
+    m_progressBar->setTextVisible(false);
+    contentLayout->addWidget(m_progressBar);
 
-    QHBoxLayout *btnLayout = new QHBoxLayout();
+    scrollArea->setWidget(contentWidget);
+    mainLayout->addWidget(scrollArea);
+
+    QWidget *footerWidget = new QWidget();
+    footerWidget->setObjectName("modalFooter");
+    QHBoxLayout *btnLayout = new QHBoxLayout(footerWidget);
+    btnLayout->setContentsMargins(60, 20, 60, 30);
+    
     m_cancelBtn = new QPushButton(tr("Cancel"));
-    m_installBtn = new QPushButton(tr("Install"));
+    m_cancelBtn->setObjectName("cancelBtn");
+    m_installBtn = new QPushButton(tr("Create"));
+    m_installBtn->setObjectName("installBtn");
     m_installBtn->setDefault(true);
+    
     btnLayout->addStretch();
     btnLayout->addWidget(m_cancelBtn);
     btnLayout->addWidget(m_installBtn);
-    mainLayout->addLayout(btnLayout);
+    mainLayout->addWidget(footerWidget);
 
     connect(m_browseBtn, &QPushButton::clicked, this, &AddInstanceDialog::onBrowseInstallPath);
     connect(m_installBtn, &QPushButton::clicked, this, &AddInstanceDialog::onInstallClicked);
-    connect(m_cancelBtn, &QPushButton::clicked, this, &QDialog::reject);
+    connect(m_cancelBtn, &QPushButton::clicked, this, [this]{ emit finished(false); });
 }
 
 void AddInstanceDialog::onReleasesUpdated(QList<ReleaseInfo> releases) {
@@ -277,7 +373,7 @@ void AddInstanceDialog::onDownloadFinished(bool success, QString error) {
         createWeaveLoaderJson(m_result.installPath);
         m_statusLabel->setText(tr("Done!"));
         m_progressBar->setVisible(false);
-        accept();
+        emit finished(true);
         return;
     }
 
@@ -307,7 +403,7 @@ void AddInstanceDialog::onDownloadFinished(bool success, QString error) {
     m_statusLabel->setText(tr("Done!"));
     m_progressBar->setVisible(false);
 
-    accept();
+    emit finished(true);
 }
 
 void AddInstanceDialog::extractZip(const QString &zipPath, const QString &destDir) {
@@ -358,7 +454,7 @@ void AddInstanceDialog::onDotNetDownloadFinished(bool success, QString errorMsg)
         QMessageBox::critical(this, tr("Download Failed"), tr("Failed to download .NET runtime: %1").arg(errorMsg));
         m_installingDotNet = false;
         m_progressBar->setVisible(false);
-        accept();
+        emit finished(true);
         return;
     }
 
@@ -451,7 +547,7 @@ void AddInstanceDialog::onDotNetDownloadFinished(bool success, QString errorMsg)
         QMessageBox::critical(this, tr("Installation Failed"), tr("Failed to start .NET runtime installer"));
         m_installingDotNet = false;
         m_progressBar->setVisible(false);
-        accept();
+        emit finished(true);
     }
 }
 
@@ -471,5 +567,5 @@ void AddInstanceDialog::onDotNetInstallFinished(int exitCode, QProcess::ExitStat
     createWeaveLoaderJson(m_result.installPath);
     m_statusLabel->setText(tr("Done!"));
     m_progressBar->setVisible(false);
-    accept();
+    emit finished(true);
 }
