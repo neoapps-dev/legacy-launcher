@@ -7,6 +7,9 @@
 ## Important!
 This project does ***not*** include the source code for Minecraft Legacy Edition, nor any code copyrighted by Mojang AB, Microsoft, or 4J Studios.
 
+## UPDATE!!
+LegacyLauncher 1.2.0 introduces [WeaveLoader](https://github.com/Jacobwasbeast/LegacyWeaveLoader) support for mods!
+
 ## Supported Platforms
 Legacy Launcher is designed primarily for GNU/Linux. Windows or macOS support is not on our list, nor is currently supported.
 Though contributions to add support for those platforms are very welcome.
@@ -15,8 +18,8 @@ Though contributions to add support for those platforms are very welcome.
 | Type | Link |
 | --- | ----------- |
 | Native Build | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/legacy-launcher) |
-| AppImage (x86_64) | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.1.0-x86_64.AppImage) |
-| Flatpak | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.1.0.flatpak) |
+| AppImage (x86_64) | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.2.0-x86_64.AppImage) |
+| Flatpak | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.2.0.flatpak) |
 
 ## Building from source
 The source code for Legacy Launcher uses the CMake build system. A Makefile is also provided for ease of use.
