@@ -4,6 +4,8 @@
   <p>Launcher for Minecraft Legacy Console Edition on GNU/Linux</p>
 </div>
 
+<img width="1340" height="837" alt="Screenshot" src="https://github.com/user-attachments/assets/1a425748-ae9f-46a9-b12b-3f4ff5cfa8bc" />
+
 ## Important!
 This project does ***not*** include the source code for Minecraft Legacy Edition, nor any code copyrighted by Mojang AB, Microsoft, or 4J Studios.
 
