@@ -126,7 +126,6 @@ void UpdateInstanceDialog::setupUi() {
     
     m_statusLabel = new QLabel();
     m_statusLabel->setObjectName("updateStatusLabel");
-    m_statusLabel->setStyleSheet("color: #b9bbbe; text-transform: none; font-weight: normal;");
     contentLayout->addWidget(m_statusLabel);
 
     m_progressBar = new QProgressBar();
@@ -134,7 +133,6 @@ void UpdateInstanceDialog::setupUi() {
     m_progressBar->setObjectName("updateProgressBar");
     m_progressBar->setFixedHeight(4);
     m_progressBar->setTextVisible(false);
-    m_progressBar->setStyleSheet("QProgressBar { background: #1e1f22; border: none; } QProgressBar::chunk { background: #2e8b57; }");
     contentLayout->addWidget(m_progressBar);
 
     scrollArea->setWidget(contentWidget);

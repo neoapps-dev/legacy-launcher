@@ -14,6 +14,7 @@
 #include <QStackedWidget>
 #include <QTextBrowser>
 #include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
 
 class InstanceManager;
 class ProtonDetector;
@@ -61,7 +62,8 @@ private:
     QStackedWidget *m_mainStack;
     QWidget *m_sidebarIndicator;
     QPropertyAnimation *m_sidebarIndicatorAnim;
-    QPropertyAnimation *m_stackFadeAnim;
+    
+    bool m_isTabAnimating;
 
     // Play Tab
     QWidget *m_playTab;

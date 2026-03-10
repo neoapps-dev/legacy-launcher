@@ -35,7 +35,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_instanceManager(new InstanceManager(this)),
       m_launchManager(new LaunchManager(this)),
-      m_releaseTracker(new GitHubReleaseTracker(this)) {
+      m_releaseTracker(new GitHubReleaseTracker(this)),
+      m_isTabAnimating(false) {
   setWindowTitle(tr("Legacy Launcher"));
   setMinimumSize(1000, 600);
 
@@ -251,7 +252,6 @@ void MainWindow::setupUi() {
 
   m_mainStack = new QStackedWidget();
   
-  m_stackFadeAnim = new QPropertyAnimation(this, "windowOpacity", this);
   // --- PLAY TAB ---
   m_playTab = new QWidget();
   m_playTab->setObjectName("playTabContent");
@@ -347,7 +347,7 @@ void MainWindow::setupUi() {
   bottomBarLayout->addStretch(1);
 
   m_playStatusLabel = new QLabel(username);
-  m_playStatusLabel->setStyleSheet("color: white; font-weight: bold; font-size: 15px; text-align: right;");
+  m_playStatusLabel->setObjectName("playStatusLabel");
   m_playStatusLabel->setMinimumWidth(100);
   m_playStatusLabel->setMaximumWidth(260);
   m_playStatusLabel->setFixedHeight(60);
@@ -411,7 +411,7 @@ void MainWindow::setupUi() {
   
   m_emptyLabel = new QLabel(tr("No installations found.\nClick \"New Installation\" to get started."));
   m_emptyLabel->setAlignment(Qt::AlignCenter);
-  m_emptyLabel->setStyleSheet("color: #888888; font-size: 14px;");
+  m_emptyLabel->setObjectName("emptyListLabel");
   m_instanceListLayout->addWidget(m_emptyLabel);
   m_scrollArea->setWidget(scrollContents);
   
@@ -425,7 +425,7 @@ void MainWindow::setupUi() {
   
   m_patchNotesBox = new QTextBrowser();
   m_patchNotesBox->setOpenExternalLinks(true);
-  m_patchNotesBox->setStyleSheet("QTextBrowser { background-color: transparent; color: #dddddd; border: none; font-size: 14px; }");
+  m_patchNotesBox->setObjectName("patchNotesBox");
   patchLayout->addWidget(m_patchNotesBox);
   
   m_mainStack->addWidget(m_patchTab);
@@ -445,22 +445,40 @@ void MainWindow::setupUi() {
 }
 
 void MainWindow::onTabNavClicked(int id) {
-  if (m_mainStack->currentIndex() == id) return;
+  if (m_mainStack->currentIndex() == id || m_isTabAnimating) return;
+  m_isTabAnimating = true;
 
   QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(m_mainStack);
   m_mainStack->setGraphicsEffect(eff);
-  QPropertyAnimation *a = new QPropertyAnimation(eff, "opacity");
-  a->setDuration(150);
-  a->setStartValue(1.0);
-  a->setEndValue(0.0);
-  connect(a, &QPropertyAnimation::finished, this, [this, id, eff, a]() {
-      m_mainStack->setCurrentIndex(id);
-      a->setDirection(QAbstractAnimation::Backward);
-      connect(a, &QPropertyAnimation::finished, eff, &QObject::deleteLater);
-      connect(a, &QPropertyAnimation::finished, a, &QObject::deleteLater);
-      a->start();
+  
+  QTimer::singleShot(0, this, [=]() {
+      QPropertyAnimation *fadeOut = new QPropertyAnimation(eff, "opacity");
+      fadeOut->setDuration(120);
+      fadeOut->setStartValue(1.0);
+      fadeOut->setEndValue(0.0);
+      fadeOut->setEasingCurve(QEasingCurve::OutCubic);
+
+      connect(fadeOut, &QPropertyAnimation::finished, this, [=]() {
+          m_mainStack->setCurrentIndex(id);
+          
+          QPropertyAnimation *fadeIn = new QPropertyAnimation(eff, "opacity");
+          fadeIn->setDuration(120);
+          fadeIn->setStartValue(0.0);
+          fadeIn->setEndValue(1.0);
+          fadeIn->setEasingCurve(QEasingCurve::InCubic);
+
+          connect(fadeIn, &QPropertyAnimation::finished, this, [=]() {
+              m_mainStack->setGraphicsEffect(nullptr);
+              m_isTabAnimating = false;
+              fadeIn->deleteLater();
+          });
+          
+          fadeIn->start();
+          fadeOut->deleteLater();
+      });
+      
+      fadeOut->start();
   });
-  a->start();
 }
 
 void MainWindow::onPlayButtonClicked() {

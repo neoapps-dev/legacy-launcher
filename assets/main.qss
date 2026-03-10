@@ -289,17 +289,16 @@ QLabel#statusBadge {
 
 /* Modal Pages (Add, Settings, Update) */
 QWidget#addInstancePage, QWidget#settingsPage, QWidget#updateInstancePage {
-    background-color: #2b2d31; /* Slightly lighter outer background */
+    background-color: #2b2d31;
 }
 
-/* Central Content Container */
 QWidget#addInstancePage QScrollArea, QWidget#settingsPage QScrollArea, QWidget#updateInstancePage QScrollArea {
     background-color: transparent;
 }
 
 QWidget#addInstancePage QWidget#contentWidget, QWidget#settingsPage QWidget#contentWidget, QWidget#updateInstancePage QWidget#contentWidget {
-    background-color: #1e1f22; /* Darker central pane */
-    border-radius: 8px; /* Optional: adds a rounded pane feel */
+    background-color: #1e1f22;
+    border-radius: 8px;
 }
 
 QWidget#modalFooter {
@@ -315,7 +314,7 @@ QLabel#titleLabel {
 
 /* Form Styles */
 QLabel#formLabel {
-    color: #b9bbbe; /* Light grey for visibility */
+    color: #b9bbbe;
     font-size: 11px;
     font-weight: bold;
     text-transform: uppercase;

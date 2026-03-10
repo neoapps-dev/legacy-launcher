@@ -41,15 +41,15 @@ void InstanceWidget::setupUi() {
     infoLayout->setSpacing(2);
 
     m_nameLabel = new QLabel();
-    m_nameLabel->setStyleSheet("font-size: 16px; font-weight: bold; color: white;");
+    m_nameLabel->setObjectName("instanceName");
     infoLayout->addWidget(m_nameLabel);
 
     m_versionLabel = new QLabel();
-    m_versionLabel->setStyleSheet("font-size: 13px; color: #aaaaaa;");
+    m_versionLabel->setObjectName("instanceVersion");
     infoLayout->addWidget(m_versionLabel);
 
     m_lastRunLabel = new QLabel();
-    m_lastRunLabel->setStyleSheet("font-size: 11px; color: #777777;");
+    m_lastRunLabel->setObjectName("instanceLastRun");
     infoLayout->addWidget(m_lastRunLabel);
 
     cardLayout->addLayout(infoLayout, 1);
