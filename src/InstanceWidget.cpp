@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QFrame>
 #include <QLabel>
+#include <QGraphicsDropShadowEffect>
 
 InstanceWidget::InstanceWidget(const Instance &instance, QWidget *parent)
     : QWidget(parent)
@@ -18,34 +19,31 @@ InstanceWidget::InstanceWidget(const Instance &instance, QWidget *parent)
 void InstanceWidget::setupUi() {
     QFrame *card = new QFrame(this);
     card->setObjectName("instanceCard");
-    card->setFrameShape(QFrame::StyledPanel);
-    card->setFrameShadow(QFrame::Raised);
+    
+    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
+    shadow->setBlurRadius(15);
+    shadow->setXOffset(0);
+    shadow->setYOffset(4);
+    shadow->setColor(QColor(0, 0, 0, 80));
+    card->setGraphicsEffect(shadow);
 
     QHBoxLayout *cardLayout = new QHBoxLayout(card);
-    cardLayout->setContentsMargins(12, 8, 12, 8);
-    cardLayout->setSpacing(12);
+    cardLayout->setContentsMargins(20, 16, 20, 16);
+    cardLayout->setSpacing(16);
 
     QVBoxLayout *infoLayout = new QVBoxLayout();
     infoLayout->setSpacing(2);
 
     m_nameLabel = new QLabel();
-    QFont nameFont = m_nameLabel->font();
-    nameFont.setBold(true);
-    m_nameLabel->setFont(nameFont);
+    m_nameLabel->setStyleSheet("font-size: 16px; font-weight: bold; color: white;");
     infoLayout->addWidget(m_nameLabel);
 
     m_versionLabel = new QLabel();
-    QFont versionFont = m_versionLabel->font();
-    versionFont.setPointSize(versionFont.pointSize() - 1);
-    m_versionLabel->setFont(versionFont);
-    m_versionLabel->setEnabled(false);
+    m_versionLabel->setStyleSheet("font-size: 13px; color: #aaaaaa;");
     infoLayout->addWidget(m_versionLabel);
 
     m_lastRunLabel = new QLabel();
-    QFont lastRunFont = m_lastRunLabel->font();
-    lastRunFont.setPointSize(lastRunFont.pointSize() - 1);
-    m_lastRunLabel->setFont(lastRunFont);
-    m_lastRunLabel->setEnabled(false);
+    m_lastRunLabel->setStyleSheet("font-size: 11px; color: #777777;");
     infoLayout->addWidget(m_lastRunLabel);
 
     cardLayout->addLayout(infoLayout, 1);
@@ -59,24 +57,25 @@ void InstanceWidget::setupUi() {
     QHBoxLayout *actionsLayout = new QHBoxLayout();
     actionsLayout->setSpacing(4);
 
-    m_updateBtn = new QPushButton(tr("Change Version"));
+    m_updateBtn = new QPushButton(tr("Update"));
     m_updateBtn->setObjectName("updateBtn");
-    m_updateBtn->setAutoDefault(false);
+    m_updateBtn->setCursor(Qt::PointingHandCursor);
     actionsLayout->addWidget(m_updateBtn);
 
     m_settingsBtn = new QPushButton(tr("Settings"));
     m_settingsBtn->setObjectName("settingsBtn");
-    m_settingsBtn->setAutoDefault(false);
+    m_settingsBtn->setCursor(Qt::PointingHandCursor);
     actionsLayout->addWidget(m_settingsBtn);
 
     m_deleteBtn = new QPushButton(tr("Delete"));
     m_deleteBtn->setObjectName("deleteBtn");
-    m_deleteBtn->setAutoDefault(false);
+    m_deleteBtn->setCursor(Qt::PointingHandCursor);
     actionsLayout->addWidget(m_deleteBtn);
 
     m_launchBtn = new QPushButton(tr("Launch"));
     m_launchBtn->setObjectName("launchBtn");
-    m_launchBtn->setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
+    m_launchBtn->setCursor(Qt::PointingHandCursor);
+    m_launchBtn->setMinimumWidth(100);
     actionsLayout->addWidget(m_launchBtn);
 
     cardLayout->addLayout(actionsLayout);

@@ -32,108 +32,6 @@ SettingsDialog::SettingsDialog(Instance instance, const QList<ProtonInstallation
 }
 
 void SettingsDialog::setupUi() {
-    setStyleSheet(R"(
-        QWidget#settingsPage {
-            background-color: #313338;
-        }
-        QLabel {
-            color: #b9bbbe;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        QLabel#titleLabel {
-            color: white;
-            font-size: 20px;
-            font-weight: 800;
-            text-transform: none;
-        }
-        QLabel#infoLabel {
-            text-transform: none;
-            font-weight: normal;
-            font-size: 13px;
-        }
-        QLineEdit, QComboBox, QSpinBox {
-            background-color: #1e1f22;
-            color: white;
-            border: 1px solid #101113;
-            border-radius: 4px;
-            padding: 12px;
-            font-size: 14px;
-        }
-        QLineEdit:hover, QComboBox:hover, QSpinBox:hover {
-            border: 1px solid #4f545c;
-        }
-        QLineEdit:focus, QComboBox:focus, QSpinBox:focus {
-            border: 1px solid #5865f2;
-        }
-        QComboBox::drop-down {
-            border: none;
-        }
-        QGroupBox {
-            color: #b9bbbe;
-            font-weight: bold;
-            border: 1px solid #4f545c;
-            border-radius: 4px;
-            margin-top: 1ex; /* leave space at the top for the title */
-            padding-top: 15px;
-        }
-        QGroupBox::title {
-            subcontrol-origin: margin;
-            subcontrol-position: top left;
-            padding: 0 3px;
-        }
-        QCheckBox {
-            color: #b9bbbe;
-            font-size: 14px;
-            text-transform: none;
-            font-weight: normal;
-        }
-        QCheckBox::indicator {
-            width: 16px;
-            height: 16px;
-            border-radius: 3px;
-            border: 1px solid #b9bbbe;
-        }
-        QCheckBox::indicator:checked {
-            background-color: #3ba55d;
-            border: none;
-            image: url(:/packaging/icon.png); /* A placeholder for checkmark */
-        }
-        QPushButton {
-            font-weight: bold;
-            border-radius: 3px;
-        }
-        QPushButton#saveBtn {
-            background-color: #2e8b57;
-            color: white;
-            padding: 10px 24px;
-            border: none;
-        }
-        QPushButton#saveBtn:hover {
-            background-color: #3cb371;
-        }
-        QPushButton#cancelBtn {
-            background-color: transparent;
-            color: white;
-            padding: 10px 24px;
-            border: 1px solid #4f545c;
-        }
-        QPushButton#cancelBtn:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        QPushButton#closeBtn {
-            background-color: transparent;
-            color: #b9bbbe;
-            border: 1px solid #4f545c;
-            border-radius: 16px;
-            font-size: 16px;
-        }
-        QPushButton#closeBtn:hover {
-            background-color: #4f545c;
-            color: white;
-        }
-    )");
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -255,7 +153,6 @@ void SettingsDialog::setupUi() {
     weaveLayoutSection->addWidget(m_weaveLoaderCombo);
 
     m_weaveLoaderStatusLabel = new QLabel(tr("Fetching versions..."));
-    m_weaveLoaderStatusLabel->setStyleSheet("color: #b9bbbe; text-transform: none; font-weight: normal;");
     weaveLayoutSection->addWidget(m_weaveLoaderStatusLabel);
     contentLayout->addLayout(weaveLayoutSection);
 
