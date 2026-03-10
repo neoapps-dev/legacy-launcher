@@ -235,28 +235,24 @@ void AddInstanceDialog::setupUi() {
     userLayout->addWidget(m_usernameEdit);
     contentLayout->addLayout(userLayout);
     
-    contentLayout->addStretch();
-    
-    form->addRow(tr("Username:"), m_usernameEdit);
-
-    QGroupBox *weaveGroup = new QGroupBox(tr("Weave Loader (Optional)"));
-    QVBoxLayout *weaveLayout = new QVBoxLayout(weaveGroup);
+    QVBoxLayout *weaveLayoutSection = new QVBoxLayout();
+    weaveLayoutSection->setSpacing(8);
+    QLabel *weaveLbl = new QLabel(tr("WEAVE LOADER (OPTIONAL)"));
+    weaveLayoutSection->addWidget(weaveLbl);
 
     m_weaveLoaderCheck = new QCheckBox(tr("Enable Weave Loader"));
-    m_weaveLoaderCheck->setChecked(false);
-    weaveLayout->addWidget(m_weaveLoaderCheck);
+    m_weaveLoaderCheck->setStyleSheet("QCheckBox { color: white; margin-top: 5px; }");
+    weaveLayoutSection->addWidget(m_weaveLoaderCheck);
 
     m_weaveLoaderCombo = new QComboBox();
-    m_weaveLoaderCombo->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed);
-    weaveLayout->addWidget(m_weaveLoaderCombo);
+    m_weaveLoaderCombo->setEnabled(false);
+    weaveLayoutSection->addWidget(m_weaveLoaderCombo);
+    contentLayout->addLayout(weaveLayoutSection);
 
     connect(m_weaveLoaderCheck, &QCheckBox::stateChanged, this, &AddInstanceDialog::onWeaveLoaderCheckChanged);
 
-    mainLayout->addLayout(form);
-    mainLayout->addWidget(weaveGroup);
-
     m_statusLabel = new QLabel();
-    m_statusLabel->setStyleSheet("color: #b9bbbe; text-transform: none; font-weight: normal;");
+    m_statusLabel->setStyleSheet("color: #b9bbbe; text-transform: none; font-weight: normal; margin-top: 10px;");
     contentLayout->addWidget(m_statusLabel);
 
     m_progressBar = new QProgressBar();
@@ -449,7 +445,7 @@ void AddInstanceDialog::onDownloadFinished(bool success, QString error) {
         createWeaveLoaderJson(m_result.installPath);
         m_statusLabel->setText(tr("Done!"));
         m_progressBar->setVisible(false);
-        accept();
+        emit finished(true);
         return;
     }
 
@@ -530,7 +526,7 @@ void AddInstanceDialog::onDotNetDownloadFinished(bool success, QString errorMsg)
         QMessageBox::critical(this, tr("Download Failed"), tr("Failed to download .NET runtime: %1").arg(errorMsg));
         m_installingDotNet = false;
         m_progressBar->setVisible(false);
-        accept();
+        emit finished(true);
         return;
     }
 
@@ -623,7 +619,7 @@ void AddInstanceDialog::onDotNetDownloadFinished(bool success, QString errorMsg)
         QMessageBox::critical(this, tr("Installation Failed"), tr("Failed to start .NET runtime installer"));
         m_installingDotNet = false;
         m_progressBar->setVisible(false);
-        accept();
+        emit finished(true);
     }
 }
 
@@ -643,5 +639,5 @@ void AddInstanceDialog::onDotNetInstallFinished(int exitCode, QProcess::ExitStat
     createWeaveLoaderJson(m_result.installPath);
     m_statusLabel->setText(tr("Done!"));
     m_progressBar->setVisible(false);
-    accept();
+    emit finished(true);
 }

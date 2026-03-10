@@ -211,13 +211,15 @@ void SettingsDialog::setupUi() {
     protonLayout->addWidget(m_protonCombo);
     contentLayout->addLayout(protonLayout);
 
-    QGroupBox *serverGroup = new QGroupBox(tr("Server / Headless"));
-    QVBoxLayout *serverLayout = new QVBoxLayout(serverGroup);
-    serverLayout->setSpacing(12);
-
+    QVBoxLayout *headlessLayout = new QVBoxLayout();
+    headlessLayout->setSpacing(8);
+    QLabel *headlessLbl = new QLabel(tr("HEADLESS / SERVER MODE"));
+    headlessLayout->addWidget(headlessLbl);
     m_headlessCheck = new QCheckBox(tr("Enable headless / server mode (-server)"));
     m_headlessCheck->setChecked(m_instance.headlessMode);
-    serverLayout->addWidget(m_headlessCheck);
+    m_headlessCheck->setStyleSheet("QCheckBox { color: white; margin-top: 5px; }");
+    headlessLayout->addWidget(m_headlessCheck);
+    contentLayout->addLayout(headlessLayout);
 
     QVBoxLayout *ipLayout = new QVBoxLayout();
     ipLayout->setSpacing(8);
@@ -226,7 +228,7 @@ void SettingsDialog::setupUi() {
     m_ipEdit->setPlaceholderText(tr("Leave blank to disable auto-connect"));
     ipLayout->addWidget(ipLbl);
     ipLayout->addWidget(m_ipEdit);
-    serverLayout->addLayout(ipLayout);
+    contentLayout->addLayout(ipLayout);
 
     QVBoxLayout *portLayout = new QVBoxLayout();
     portLayout->setSpacing(8);
@@ -237,28 +239,27 @@ void SettingsDialog::setupUi() {
     m_portSpin->setSpecialValueText(tr("None"));
     portLayout->addWidget(portLbl);
     portLayout->addWidget(m_portSpin);
-    serverLayout->addLayout(portLayout);
+    contentLayout->addLayout(portLayout);
 
-    contentLayout->addWidget(serverGroup);
-
-    QGroupBox *weaveGroup = new QGroupBox(tr("Weave Loader"));
-    QVBoxLayout *weaveLayout = new QVBoxLayout(weaveGroup);
+    QVBoxLayout *weaveLayoutSection = new QVBoxLayout();
+    weaveLayoutSection->setSpacing(8);
+    QLabel *weaveLbl = new QLabel(tr("WEAVE LOADER"));
+    weaveLayoutSection->addWidget(weaveLbl);
 
     m_weaveLoaderCheck = new QCheckBox(tr("Enable Weave Loader"));
     m_weaveLoaderCheck->setChecked(m_instance.weaveLoaderEnabled);
-    weaveLayout->addWidget(m_weaveLoaderCheck);
+    m_weaveLoaderCheck->setStyleSheet("QCheckBox { color: white; margin-top: 5px; }");
+    weaveLayoutSection->addWidget(m_weaveLoaderCheck);
 
     m_weaveLoaderCombo = new QComboBox();
-    m_weaveLoaderCombo->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed);
-    weaveLayout->addWidget(m_weaveLoaderCombo);
+    weaveLayoutSection->addWidget(m_weaveLoaderCombo);
 
     m_weaveLoaderStatusLabel = new QLabel(tr("Fetching versions..."));
-    m_weaveLoaderStatusLabel->setEnabled(false);
-    weaveLayout->addWidget(m_weaveLoaderStatusLabel);
+    m_weaveLoaderStatusLabel->setStyleSheet("color: #b9bbbe; text-transform: none; font-weight: normal;");
+    weaveLayoutSection->addWidget(m_weaveLoaderStatusLabel);
+    contentLayout->addLayout(weaveLayoutSection);
 
     connect(m_weaveLoaderCheck, &QCheckBox::stateChanged, this, &SettingsDialog::onWeaveLoaderCheckChanged);
-
-    mainLayout->addWidget(weaveGroup);
 
     QLabel *pathLabel = new QLabel(tr("Install path: %1").arg(m_instance.installPath));
     pathLabel->setObjectName("infoLabel");
@@ -300,8 +301,6 @@ void SettingsDialog::onAccept() {
     if (idx >= 0 && idx < m_protons.size()) {
         m_instance.protonId = m_protons[idx].path;
     }
-
-    emit finished(true);
     bool wasEnabled = m_instance.weaveLoaderEnabled;
     m_instance.weaveLoaderEnabled = m_weaveLoaderCheck->isChecked();
 
@@ -319,8 +318,7 @@ void SettingsDialog::onAccept() {
         m_instance.weaveLoaderTag = "";
         m_instance.weaveLoaderInstalledAt = QDateTime();
     }
-
-    accept();
+    emit finished(true);
 }
 
 void SettingsDialog::onWeaveLoaderReleasesUpdated(QList<ReleaseInfo> releases) {

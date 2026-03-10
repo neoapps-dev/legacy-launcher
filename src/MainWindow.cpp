@@ -95,60 +95,6 @@ void MainWindow::applyGlobalStylesheet() {
         font-weight: bold;
         border-left: 4px solid #3BA55D;
     }
-        QLabel#headerTitle {
-            font-size: 24px;
-            font-weight: 700;
-            padding: 0;
-        }
-
-        QLabel#headerSubtitle {
-            font-size: 13px;
-            padding: 0;
-        }
-    )";
-  qApp->setStyleSheet(css);
-}
-
-void MainWindow::setupUi() {
-  m_centralWidget = new QWidget(this);
-  m_centralWidget->setObjectName("centralPanel");
-  setCentralWidget(m_centralWidget);
-
-  QVBoxLayout *rootLayout = new QVBoxLayout(m_centralWidget);
-  rootLayout->setContentsMargins(28, 24, 28, 12);
-  rootLayout->setSpacing(0);
-
-  QVBoxLayout *headerBlock = new QVBoxLayout();
-  headerBlock->setSpacing(4);
-
-  QHBoxLayout *headerTop = new QHBoxLayout();
-  headerTop->setSpacing(16);
-
-  QLabel *logoLabel = new QLabel();
-  QPixmap logoPixmap(":/packaging/icon.png");
-  if (!logoPixmap.isNull()) {
-    logoPixmap = logoPixmap.scaled(50, 50, Qt::KeepAspectRatio,
-                                   Qt::SmoothTransformation);
-    logoLabel->setPixmap(logoPixmap);
-  }
-  logoLabel->setFixedSize(50, 50);
-  headerTop->addWidget(logoLabel);
-
-  QVBoxLayout *titleBlock = new QVBoxLayout();
-  titleBlock->setSpacing(4);
-
-  QLabel *titleLabel = new QLabel(tr("Legacy Launcher"));
-  titleLabel->setObjectName("headerTitle");
-  titleBlock->addWidget(titleLabel);
-
-  QLabel *subtitleLabel = new QLabel(tr("Minecraft Legacy Console Edition"));
-  subtitleLabel->setObjectName("headerSubtitle");
-  titleBlock->addWidget(subtitleLabel);
-
-  titleBlock->addStretch();
-  headerTop->addLayout(titleBlock);
-
-  headerBlock->addLayout(headerTop);
 
     /* Top Nav (Tabs) */
     QWidget#topNav {
@@ -340,9 +286,21 @@ void MainWindow::setupUi() {
     }
     QLabel { color: #dddddd; }
     QLabel#statusBadge { color: white; }
+    
+    QLabel#headerTitle {
+        font-size: 24px;
+        font-weight: 700;
+        padding: 0;
+    }
+
+    QLabel#headerSubtitle {
+        font-size: 13px;
+        padding: 0;
+    }
   )";
   qApp->setStyleSheet(css);
 }
+
 
 void MainWindow::setupUi() {
   m_rootStack = new QStackedWidget(this);
