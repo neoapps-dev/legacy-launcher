@@ -20,8 +20,8 @@ Though contributions to add support for those platforms are very welcome.
 | Type | Link |
 | --- | ----------- |
 | Native Build | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/legacy-launcher) |
-| AppImage (x86_64) | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.2.0-x86_64.AppImage) |
-| Flatpak | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.2.0.flatpak) |
+| AppImage (x86_64) | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.3.0-x86_64.AppImage) |
+| Flatpak | [here](https://github.com/neoapps-dev/legacy-launcher/releases/latest/download/LegacyLauncher-1.3.0.flatpak) |
 
 ## Building from source
 The source code for Legacy Launcher uses the CMake build system. A Makefile is also provided for ease of use.
