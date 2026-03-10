@@ -147,7 +147,7 @@ void LaunchManager::continueLaunch() {
 
 void LaunchManager::createWeaveLoaderJson(const QString &installPath) {
     QJsonObject obj;
-    obj["GameExePath"] = ".\\Minecraft.Client.exe";
+    obj["GameExePath"] = "Z:" + installPath + "/Minecraft.Client.exe";
 
     QJsonDocument doc(obj);
     QString jsonPath = installPath + "/weaveloader.json";
@@ -349,7 +349,6 @@ QString LaunchManager::protonPrefixPath(const Instance &instance) const {
 
 QStringList LaunchManager::buildGameArgs(const Instance &instance) const {
     QStringList args;
-
     if (!instance.username.isEmpty()) {
         args << "-name" << instance.username;
     }
