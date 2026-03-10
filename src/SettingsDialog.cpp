@@ -23,6 +23,7 @@ SettingsDialog::SettingsDialog(Instance instance, const QList<ProtonInstallation
     setObjectName("settingsPage");
     setWindowTitle(tr("Edit installation"));
     setMinimumWidth(700);
+    setAttribute(Qt::WA_StyledBackground);
     setupUi();
 
     connect(m_weaveLoaderTracker, &WeaveLoaderReleaseTracker::releasesUpdated, this, &SettingsDialog::onWeaveLoaderReleasesUpdated);
@@ -45,7 +46,7 @@ void SettingsDialog::setupUi() {
     QLabel *titleLabel = new QLabel(tr("Edit installation"));
     titleLabel->setObjectName("titleLabel");
     titleLabel->setAlignment(Qt::AlignCenter);
-    headerLayout->addWidget(titleLabel);
+    headerLayout->addWidget(titleLabel, 0, Qt::AlignCenter);
     headerLayout->addStretch();
     
     QPushButton *closeBtn = new QPushButton("✕");
@@ -59,10 +60,10 @@ void SettingsDialog::setupUi() {
     QScrollArea *scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
-    scrollArea->setStyleSheet("QScrollArea { border: none; background-color: transparent; } QScrollBar { background: #2b2d31; width: 8px; } QScrollBar::handle { background: #1e1f22; border-radius: 4px; }");
+    scrollArea->setObjectName("settingsScrollArea");
 
     QWidget *contentWidget = new QWidget();
-    contentWidget->setStyleSheet("background-color: transparent;");
+    contentWidget->setObjectName("contentWidget");
     QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
     contentLayout->setContentsMargins(100, 20, 100, 40);
     contentLayout->setSpacing(24);
@@ -74,16 +75,18 @@ void SettingsDialog::setupUi() {
     contentLayout->addSpacing(10);
 
     QVBoxLayout *nameLayout = new QVBoxLayout();
-    nameLayout->setSpacing(8);
+    nameLayout->setSpacing(4);
     QLabel *nameLbl = new QLabel(tr("NAME"));
+    nameLbl->setObjectName("formLabel");
     m_nameEdit = new QLineEdit(m_instance.name);
     nameLayout->addWidget(nameLbl);
     nameLayout->addWidget(m_nameEdit);
     contentLayout->addLayout(nameLayout);
 
     QVBoxLayout *userLayout = new QVBoxLayout();
-    userLayout->setSpacing(8);
+    userLayout->setSpacing(4);
     QLabel *userLbl = new QLabel(tr("USERNAME"));
+    userLbl->setObjectName("formLabel");
     m_usernameEdit = new QLineEdit(m_instance.username);
     m_usernameEdit->setPlaceholderText(tr("Player"));
     userLayout->addWidget(userLbl);
@@ -91,8 +94,9 @@ void SettingsDialog::setupUi() {
     contentLayout->addLayout(userLayout);
 
     QVBoxLayout *protonLayout = new QVBoxLayout();
-    protonLayout->setSpacing(8);
+    protonLayout->setSpacing(4);
     QLabel *protonLbl = new QLabel(tr("PROTON"));
+    protonLbl->setObjectName("formLabel");
     m_protonCombo = new QComboBox();
     int selectedProton = 0;
     for (int i = 0; i < m_protons.size(); ++i) {
@@ -110,18 +114,20 @@ void SettingsDialog::setupUi() {
     contentLayout->addLayout(protonLayout);
 
     QVBoxLayout *headlessLayout = new QVBoxLayout();
-    headlessLayout->setSpacing(8);
+    headlessLayout->setSpacing(4);
     QLabel *headlessLbl = new QLabel(tr("HEADLESS / SERVER MODE"));
+    headlessLbl->setObjectName("formLabel");
     headlessLayout->addWidget(headlessLbl);
     m_headlessCheck = new QCheckBox(tr("Enable headless / server mode (-server)"));
     m_headlessCheck->setChecked(m_instance.headlessMode);
-    m_headlessCheck->setStyleSheet("QCheckBox { color: white; margin-top: 5px; }");
+    m_headlessCheck->setObjectName("headlessCheck");
     headlessLayout->addWidget(m_headlessCheck);
     contentLayout->addLayout(headlessLayout);
 
     QVBoxLayout *ipLayout = new QVBoxLayout();
-    ipLayout->setSpacing(8);
+    ipLayout->setSpacing(4);
     QLabel *ipLbl = new QLabel(tr("AUTO-CONNECT IP"));
+    ipLbl->setObjectName("formLabel");
     m_ipEdit = new QLineEdit(m_instance.autoIp);
     m_ipEdit->setPlaceholderText(tr("Leave blank to disable auto-connect"));
     ipLayout->addWidget(ipLbl);
@@ -129,8 +135,9 @@ void SettingsDialog::setupUi() {
     contentLayout->addLayout(ipLayout);
 
     QVBoxLayout *portLayout = new QVBoxLayout();
-    portLayout->setSpacing(8);
+    portLayout->setSpacing(4);
     QLabel *portLbl = new QLabel(tr("AUTO-CONNECT PORT"));
+    portLbl->setObjectName("formLabel");
     m_portSpin = new QSpinBox();
     m_portSpin->setRange(0, 65535);
     m_portSpin->setValue(m_instance.autoPort);
@@ -140,13 +147,13 @@ void SettingsDialog::setupUi() {
     contentLayout->addLayout(portLayout);
 
     QVBoxLayout *weaveLayoutSection = new QVBoxLayout();
-    weaveLayoutSection->setSpacing(8);
+    weaveLayoutSection->setSpacing(4);
     QLabel *weaveLbl = new QLabel(tr("WEAVE LOADER"));
+    weaveLbl->setObjectName("formLabel");
     weaveLayoutSection->addWidget(weaveLbl);
 
     m_weaveLoaderCheck = new QCheckBox(tr("Enable Weave Loader"));
     m_weaveLoaderCheck->setChecked(m_instance.weaveLoaderEnabled);
-    m_weaveLoaderCheck->setStyleSheet("QCheckBox { color: white; margin-top: 5px; }");
     weaveLayoutSection->addWidget(m_weaveLoaderCheck);
 
     m_weaveLoaderCombo = new QComboBox();
@@ -168,7 +175,7 @@ void SettingsDialog::setupUi() {
     mainLayout->addWidget(scrollArea);
 
     QWidget *footerWidget = new QWidget();
-    footerWidget->setStyleSheet("background-color: transparent; border-top: 1px solid rgba(255, 255, 255, 0.05);");
+    footerWidget->setObjectName("modalFooter");
     QHBoxLayout *btnLayout = new QHBoxLayout(footerWidget);
     btnLayout->setContentsMargins(60, 20, 60, 30);
     

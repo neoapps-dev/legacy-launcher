@@ -25,6 +25,7 @@ UpdateInstanceDialog::UpdateInstanceDialog(const Instance &instance,
     setObjectName("updateInstancePage");
     setWindowTitle(tr("Update Instance"));
     setMinimumWidth(550);
+    setAttribute(Qt::WA_StyledBackground);
     setupUi();
 
     connect(m_downloader, &Downloader::progressChanged, this, &UpdateInstanceDialog::onDownloadProgress);
@@ -45,7 +46,7 @@ void UpdateInstanceDialog::setupUi() {
     QLabel *titleLabel = new QLabel(tr("Change Version"));
     titleLabel->setObjectName("titleLabel");
     titleLabel->setAlignment(Qt::AlignCenter);
-    headerLayout->addWidget(titleLabel);
+    headerLayout->addWidget(titleLabel, 0, Qt::AlignCenter);
     headerLayout->addStretch();
     
     QPushButton *closeBtn = new QPushButton("✕");
@@ -59,10 +60,10 @@ void UpdateInstanceDialog::setupUi() {
     QScrollArea *scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
-    scrollArea->setStyleSheet("QScrollArea { background-color: transparent; } QScrollBar { background: #2b2d31; width: 8px; } QScrollBar::handle { background: #1e1f22; border-radius: 4px; }");
+    scrollArea->setObjectName("updateScrollArea");
 
     QWidget *contentWidget = new QWidget();
-    contentWidget->setStyleSheet("background-color: transparent;");
+    contentWidget->setObjectName("contentWidget");
     QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
     contentLayout->setContentsMargins(100, 20, 100, 40);
     contentLayout->setSpacing(24);
@@ -74,8 +75,9 @@ void UpdateInstanceDialog::setupUi() {
     contentLayout->addSpacing(10);
 
     QVBoxLayout *nameLayout = new QVBoxLayout();
-    nameLayout->setSpacing(8);
+    nameLayout->setSpacing(4);
     QLabel *nameLbl = new QLabel(tr("NAME"));
+    nameLbl->setObjectName("formLabel");
     m_nameLabel = new QLabel(m_instance.name);
     m_nameLabel->setObjectName("valLabel");
     nameLayout->addWidget(nameLbl);
@@ -83,8 +85,9 @@ void UpdateInstanceDialog::setupUi() {
     contentLayout->addLayout(nameLayout);
 
     QVBoxLayout *currVerLayout = new QVBoxLayout();
-    currVerLayout->setSpacing(8);
+    currVerLayout->setSpacing(4);
     QLabel *currVerLbl = new QLabel(tr("CURRENT VERSION"));
+    currVerLbl->setObjectName("formLabel");
     m_currentVersionLabel = new QLabel(m_instance.installedTag.isEmpty() ? tr("Unknown") : m_instance.installedTag);
     m_currentVersionLabel->setObjectName("valLabel");
     currVerLayout->addWidget(currVerLbl);
@@ -92,8 +95,9 @@ void UpdateInstanceDialog::setupUi() {
     contentLayout->addLayout(currVerLayout);
 
     QVBoxLayout *targetVerLayout = new QVBoxLayout();
-    targetVerLayout->setSpacing(8);
+    targetVerLayout->setSpacing(4);
     QLabel *targetVerLbl = new QLabel(tr("TARGET VERSION"));
+    targetVerLbl->setObjectName("formLabel");
     m_targetVersionCombo = new QComboBox();
     m_targetVersionCombo->setObjectName("targetVersionCombo");
     for (const ReleaseInfo &r : m_releases) {
@@ -137,7 +141,7 @@ void UpdateInstanceDialog::setupUi() {
     mainLayout->addWidget(scrollArea);
 
     QWidget *footerWidget = new QWidget();
-    footerWidget->setStyleSheet("background-color: transparent; border-top: 1px solid rgba(255, 255, 255, 0.05);");
+    footerWidget->setObjectName("modalFooter");
     QHBoxLayout *btnLayout = new QHBoxLayout(footerWidget);
     btnLayout->setContentsMargins(60, 20, 60, 30);
     

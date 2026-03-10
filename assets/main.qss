@@ -291,7 +291,22 @@ QLabel#statusBadge {
 
 /* Modal Pages (Add, Settings, Update) */
 QWidget#addInstancePage, QWidget#settingsPage, QWidget#updateInstancePage {
-    background-color: #313338;
+    background-color: #2b2d31; /* Slightly lighter outer background */
+}
+
+/* Central Content Container */
+QWidget#addInstancePage QScrollArea, QWidget#settingsPage QScrollArea, QWidget#updateInstancePage QScrollArea {
+    background-color: transparent;
+}
+
+QWidget#addInstancePage QWidget#contentWidget, QWidget#settingsPage QWidget#contentWidget, QWidget#updateInstancePage QWidget#contentWidget {
+    background-color: #1e1f22; /* Darker central pane */
+    border-radius: 8px; /* Optional: adds a rounded pane feel */
+}
+
+QWidget#modalFooter {
+    background-color: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 QLabel#titleLabel {
@@ -300,52 +315,89 @@ QLabel#titleLabel {
     font-weight: 800;
 }
 
-QLabel#headerTitle {
-    font-size: 24px;
-    font-weight: 700;
+/* Form Styles */
+QLabel#formLabel {
+    color: #b9bbbe; /* Light grey for visibility */
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 4px;
 }
 
-QLabel#headerSubtitle {
-    font-size: 13px;
-}
-
-QLineEdit, QComboBox, QSpinBox {
-    background-color: #1e1f22;
+QLineEdit, QComboBox, QSpinBox, QLabel#valLabel {
+    background-color: #000000;
     color: white;
-    border: 1px solid #101113;
-    border-radius: 4px;
-    padding: 12px;
+    border: 1px solid #1e1f22;
+    border-radius: 2px;
+    padding: 10px;
     font-size: 14px;
+    font-weight: 400;
 }
+
 QLineEdit:hover, QComboBox:hover, QSpinBox:hover {
     border: 1px solid #4f545c;
 }
+
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus {
     border: 1px solid #5865f2;
 }
 
-QPushButton#installBtn, QPushButton#saveBtn, QPushButton#updateConfirmBtn {
-    background-color: #2e8b57;
+QLineEdit#pathEdit {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+QPushButton#browseBtn {
+    background-color: #1a1a1a;
+    color: #b9bbbe;
+    border: 1px solid #1e1f22;
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    padding: 10px 16px;
+    font-weight: bold;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+QPushButton#browseBtn:hover {
     color: white;
-    padding: 12px 28px;
+    background-color: #2b2d31;
+}
+
+QPushButton#installBtn, QPushButton#saveBtn, QPushButton#updateConfirmBtn {
+    background-color: #3ba55d;
+    color: white;
+    padding: 10px 24px;
     border: none;
     font-weight: bold;
+    font-size: 14px;
+    border-radius: 2px;
+    min-width: 100px;
 }
+
 QPushButton#installBtn:hover, QPushButton#saveBtn:hover, QPushButton#updateConfirmBtn:hover {
-    background-color: #3cb371;
+    background-color: #248046;
 }
+
 QPushButton#installBtn:disabled, QPushButton#updateConfirmBtn:disabled {
-    background-color: #4f545c;
-    color: #888888;
+    background-color: #2b2d31;
+    color: #4f545c;
 }
 
 QPushButton#cancelBtn, QPushButton#updateCancelBtn {
     background-color: transparent;
     color: white;
-    padding: 12px 28px;
+    padding: 10px 24px;
     border: 1px solid #4f545c;
     font-weight: bold;
+    font-size: 14px;
+    border-radius: 2px;
+    min-width: 100px;
 }
+
 QPushButton#cancelBtn:hover, QPushButton#updateCancelBtn:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
@@ -353,48 +405,54 @@ QPushButton#cancelBtn:hover, QPushButton#updateCancelBtn:hover {
 QPushButton#closeBtn {
     background-color: transparent;
     color: #b9bbbe;
-    border: 1px solid #4f545c;
-    border-radius: 16px;
-    font-size: 16px;
+    border: none;
+    font-size: 20px;
 }
+
 QPushButton#closeBtn:hover {
-    background-color: #4f545c;
     color: white;
 }
 
+/* Checkboxes */
 QCheckBox {
     color: #b9bbbe;
     font-size: 14px;
+    background: transparent;
 }
 
 QCheckBox::indicator {
     width: 18px;
     height: 18px;
-    border-radius: 4px;
+    border-radius: 2px;
     border: 1px solid #4f545c;
-    background-color: #1e1f22;
+    background-color: #000000;
 }
+
 QCheckBox::indicator:checked {
     background-color: #3ba55d;
     border: none;
-    image: url(:/packaging/icon.png); /* Placeholder for checkmark */
 }
 
-QLabel#valLabel {
-    color: white;
-    font-size: 14px;
-    background-color: #1e1f22;
-    border: 1px solid #101113;
-    border-radius: 4px;
-    padding: 12px;
-}
-
-QPushButton#browseBtn {
-    background-color: #2b2d31;
-    color: #b9bbbe;
+/* Progress Bars */
+QProgressBar#installProgressBar, QProgressBar#updateProgressBar {
+    background: #1e1f22;
     border: none;
-    padding: 10px 16px;
+    height: 4px;
 }
-QPushButton#browseBtn:hover {
-    color: white;
+
+QProgressBar#installProgressBar::chunk, QProgressBar#updateProgressBar::chunk {
+    background: #3ba55d;
+}
+
+/* Labels showing info */
+QLabel#statusLabel, QLabel#updateStatusLabel {
+    color: #646b75;
+    font-size: 12px;
+    text-transform: none;
+}
+
+QLabel#infoLabel {
+    color: #b9bbbe;
+    font-size: 13px;
+    font-style: italic;
 }

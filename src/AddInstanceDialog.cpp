@@ -38,6 +38,7 @@ AddInstanceDialog::AddInstanceDialog(const QList<ProtonInstallation> &protons, Q
     setObjectName("addInstancePage");
     setWindowTitle(tr("Add Instance"));
     setMinimumWidth(700);
+    setAttribute(Qt::WA_StyledBackground);
     setupUi();
 
     connect(m_tracker, &GitHubReleaseTracker::releasesUpdated, this, &AddInstanceDialog::onReleasesUpdated);
@@ -68,7 +69,7 @@ void AddInstanceDialog::setupUi() {
     QLabel *titleLabel = new QLabel(tr("Create new installation"));
     titleLabel->setObjectName("titleLabel");
     titleLabel->setAlignment(Qt::AlignCenter);
-    headerLayout->addWidget(titleLabel);
+    headerLayout->addWidget(titleLabel, 0, Qt::AlignCenter);
     headerLayout->addStretch();
     
     QPushButton *closeBtn = new QPushButton("✕");
@@ -82,10 +83,10 @@ void AddInstanceDialog::setupUi() {
     QScrollArea *scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
-    scrollArea->setStyleSheet("QScrollArea { border: none; background-color: transparent; } QScrollBar { background: #2b2d31; width: 8px; } QScrollBar::handle { background: #1e1f22; border-radius: 4px; }");
+    scrollArea->setObjectName("addInstanceScrollArea");
     
     QWidget *contentWidget = new QWidget();
-    contentWidget->setStyleSheet("background-color: transparent;");
+    contentWidget->setObjectName("contentWidget");
     QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
     contentLayout->setContentsMargins(100, 20, 100, 40);
     contentLayout->setSpacing(24);
@@ -97,8 +98,9 @@ void AddInstanceDialog::setupUi() {
     contentLayout->addSpacing(10);
 
     QVBoxLayout *nameLayout = new QVBoxLayout();
-    nameLayout->setSpacing(8);
+    nameLayout->setSpacing(4);
     QLabel *nameLbl = new QLabel(tr("NAME"));
+    nameLbl->setObjectName("formLabel");
     m_nameEdit = new QLineEdit();
     m_nameEdit->setText(tr("unnamed installation"));
     nameLayout->addWidget(nameLbl);
@@ -106,34 +108,38 @@ void AddInstanceDialog::setupUi() {
     contentLayout->addLayout(nameLayout);
 
     QVBoxLayout *verLayout = new QVBoxLayout();
-    verLayout->setSpacing(8);
+    verLayout->setSpacing(4);
     QLabel *verLbl = new QLabel(tr("VERSION"));
+    verLbl->setObjectName("formLabel");
     m_releaseCombo = new QComboBox();
     verLayout->addWidget(verLbl);
     verLayout->addWidget(m_releaseCombo);
     contentLayout->addLayout(verLayout);
 
     QVBoxLayout *pathContainerLayout = new QVBoxLayout();
-    pathContainerLayout->setSpacing(8);
+    pathContainerLayout->setSpacing(4);
     QLabel *pathLbl = new QLabel(tr("GAME DIRECTORY"));
+    pathLbl->setObjectName("formLabel");
     pathContainerLayout->addWidget(pathLbl);
     
     QHBoxLayout *pathLayout = new QHBoxLayout();
     pathLayout->setSpacing(0);
     m_installPathEdit = new QLineEdit();
     m_installPathEdit->setPlaceholderText(tr("<Use default directory>"));
-    m_installPathEdit->setStyleSheet("QLineEdit { border-top-right-radius: 0; border-bottom-right-radius: 0; }");
+    m_installPathEdit->setObjectName("pathEdit");
     m_browseBtn = new QPushButton(tr("BROWSE"));
     m_browseBtn->setObjectName("browseBtn");
-    m_browseBtn->setStyleSheet("QPushButton { border-top-left-radius: 0; border-bottom-left-radius: 0; }");
+    m_browseBtn->setCursor(Qt::PointingHandCursor);
+    m_browseBtn->setFixedHeight(m_nameEdit->sizeHint().height());
     pathLayout->addWidget(m_installPathEdit);
     pathLayout->addWidget(m_browseBtn);
     pathContainerLayout->addLayout(pathLayout);
     contentLayout->addLayout(pathContainerLayout);
 
     QVBoxLayout *protonLayout = new QVBoxLayout();
-    protonLayout->setSpacing(8);
+    protonLayout->setSpacing(4);
     QLabel *protonLbl = new QLabel(tr("PROTON"));
+    protonLbl->setObjectName("formLabel");
     m_protonCombo = new QComboBox();
     for (const ProtonInstallation &p : m_protons) {
         m_protonCombo->addItem(p.name, p.path);
@@ -147,8 +153,9 @@ void AddInstanceDialog::setupUi() {
     contentLayout->addLayout(protonLayout);
 
     QVBoxLayout *userLayout = new QVBoxLayout();
-    userLayout->setSpacing(8);
+    userLayout->setSpacing(4);
     QLabel *userLbl = new QLabel(tr("USERNAME"));
+    userLbl->setObjectName("formLabel");
     m_usernameEdit = new QLineEdit();
     m_usernameEdit->setPlaceholderText(tr("Player"));
     userLayout->addWidget(userLbl);
@@ -156,12 +163,13 @@ void AddInstanceDialog::setupUi() {
     contentLayout->addLayout(userLayout);
     
     QVBoxLayout *weaveLayoutSection = new QVBoxLayout();
-    weaveLayoutSection->setSpacing(8);
+    weaveLayoutSection->setSpacing(4);
     QLabel *weaveLbl = new QLabel(tr("WEAVE LOADER (OPTIONAL)"));
+    weaveLbl->setObjectName("formLabel");
     weaveLayoutSection->addWidget(weaveLbl);
 
     m_weaveLoaderCheck = new QCheckBox(tr("Enable Weave Loader"));
-    m_weaveLoaderCheck->setStyleSheet("QCheckBox { color: white; margin-top: 5px; }");
+    m_weaveLoaderCheck->setObjectName("weaveCheck");
     weaveLayoutSection->addWidget(m_weaveLoaderCheck);
 
     m_weaveLoaderCombo = new QComboBox();
@@ -172,21 +180,21 @@ void AddInstanceDialog::setupUi() {
     connect(m_weaveLoaderCheck, &QCheckBox::stateChanged, this, &AddInstanceDialog::onWeaveLoaderCheckChanged);
 
     m_statusLabel = new QLabel();
-    m_statusLabel->setStyleSheet("color: #b9bbbe; text-transform: none; font-weight: normal; margin-top: 10px;");
+    m_statusLabel->setObjectName("statusLabel");
     contentLayout->addWidget(m_statusLabel);
 
     m_progressBar = new QProgressBar();
     m_progressBar->setVisible(false);
+    m_progressBar->setObjectName("installProgressBar");
     m_progressBar->setFixedHeight(4);
     m_progressBar->setTextVisible(false);
-    m_progressBar->setStyleSheet("QProgressBar { background: #1e1f22; border: none; } QProgressBar::chunk { background: #2e8b57; }");
     contentLayout->addWidget(m_progressBar);
 
     scrollArea->setWidget(contentWidget);
     mainLayout->addWidget(scrollArea);
 
     QWidget *footerWidget = new QWidget();
-    footerWidget->setStyleSheet("background-color: transparent; border-top: 1px solid rgba(255, 255, 255, 0.05);");
+    footerWidget->setObjectName("modalFooter");
     QHBoxLayout *btnLayout = new QHBoxLayout(footerWidget);
     btnLayout->setContentsMargins(60, 20, 60, 30);
     

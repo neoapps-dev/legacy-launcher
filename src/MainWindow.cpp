@@ -27,6 +27,7 @@
 #include <QVBoxLayout>
 #include <QFile>
 #include <QTextStream>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_instanceManager(new InstanceManager(this)),
@@ -62,7 +63,8 @@ void MainWindow::applyGlobalStylesheet() {
   QFile file(":/assets/main.qss");
   if (file.open(QFile::ReadOnly | QFile::Text)) {
     QTextStream ts(&file);
-    qApp->setStyleSheet(ts.readAll());
+    QString style = ts.readAll();
+    qApp->setStyleSheet(style);
   }
 }
 
@@ -366,6 +368,8 @@ void MainWindow::setupUi() {
   m_scrollArea = new QScrollArea();
   m_scrollArea->setObjectName("installationsScroll");
   m_scrollArea->setWidgetResizable(true);
+  m_scrollArea->setFrameShape(QFrame::NoFrame);
+  m_scrollArea->setObjectName("installationsScrollArea");
   m_scrollArea->setFocusPolicy(Qt::NoFocus);
   m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   
