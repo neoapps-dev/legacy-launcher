@@ -448,37 +448,32 @@ void MainWindow::onTabNavClicked(int id) {
   if (m_mainStack->currentIndex() == id || m_isTabAnimating) return;
   m_isTabAnimating = true;
 
-  QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(m_mainStack);
-  m_mainStack->setGraphicsEffect(eff);
+  QPixmap snapshot = m_mainStack->grab();
   
-  QTimer::singleShot(0, this, [=]() {
-      QPropertyAnimation *fadeOut = new QPropertyAnimation(eff, "opacity");
-      fadeOut->setDuration(120);
-      fadeOut->setStartValue(1.0);
-      fadeOut->setEndValue(0.0);
-      fadeOut->setEasingCurve(QEasingCurve::OutCubic);
+  QLabel *overlay = new QLabel(m_mainStack->parentWidget());
+  overlay->setPixmap(snapshot);
+  overlay->setGeometry(m_mainStack->geometry());
+  overlay->show();
+  overlay->raise();
 
-      connect(fadeOut, &QPropertyAnimation::finished, this, [=]() {
-          m_mainStack->setCurrentIndex(id);
-          
-          QPropertyAnimation *fadeIn = new QPropertyAnimation(eff, "opacity");
-          fadeIn->setDuration(120);
-          fadeIn->setStartValue(0.0);
-          fadeIn->setEndValue(1.0);
-          fadeIn->setEasingCurve(QEasingCurve::InCubic);
+  m_mainStack->setCurrentIndex(id);
 
-          connect(fadeIn, &QPropertyAnimation::finished, this, [=]() {
-              m_mainStack->setGraphicsEffect(nullptr);
-              m_isTabAnimating = false;
-              fadeIn->deleteLater();
-          });
-          
-          fadeIn->start();
-          fadeOut->deleteLater();
-      });
-      
-      fadeOut->start();
+  QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(overlay);
+  overlay->setGraphicsEffect(eff);
+  
+  QPropertyAnimation *anim = new QPropertyAnimation(eff, "opacity");
+  anim->setDuration(250);
+  anim->setStartValue(1.0);
+  anim->setEndValue(0.0);
+  anim->setEasingCurve(QEasingCurve::InOutQuad);
+
+  connect(anim, &QPropertyAnimation::finished, this, [=]() {
+      overlay->deleteLater();
+      m_isTabAnimating = false;
+      anim->deleteLater();
   });
+  
+  anim->start();
 }
 
 void MainWindow::onPlayButtonClicked() {
