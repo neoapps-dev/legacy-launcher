@@ -4,12 +4,9 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QCoreApplication>
-#include <QJsonDocument>
-#include <QJsonObject>
 
 LaunchManager::LaunchManager(QObject *parent)
     : QObject(parent)
-    , m_downloader(new Downloader(this))
 {}
 
 void LaunchManager::continueLaunch() {
@@ -145,165 +142,20 @@ void LaunchManager::continueLaunch() {
     emit instanceStarted(instance.id);
 }
 
-void LaunchManager::createWeaveLoaderJson(const QString &installPath) {
-    QJsonObject obj;
-    obj["GameExePath"] = "Z:" + installPath + "/Minecraft.Client.exe";
-
-    QJsonDocument doc(obj);
-    QString jsonPath = installPath + "/weaveloader.json";
-    QFile file(jsonPath);
-    if (file.open(QIODevice::WriteOnly)) {
-        file.write(doc.toJson(QJsonDocument::Indented));
-        file.close();
-    }
-}
-
-void LaunchManager::installDotNetRuntime(const Instance &instance, const ProtonInstallation &proton) {
-    QString dotNetUrl = "https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/8.0.24/windowsdesktop-runtime-8.0.24-win-x64.exe";
-    QString tempPath = QDir::tempPath() + "/windowsdesktop-runtime-8.0.24-win-x64.exe";
-
-    m_currentInstance = instance;
-    m_currentProton = proton;
-
-    if (instance.weaveLoaderEnabled) {
-        m_currentGameExe = instance.installPath + "/WeaveLoader.exe";
-    } else {
-        m_currentGameExe = instance.installPath + "/Minecraft.Client.exe";
-    }
-
-    connect(m_downloader, &Downloader::finished, this, &LaunchManager::onDotNetDownloadFinished);
-    m_downloader->download(dotNetUrl, tempPath);
-}
-
-void LaunchManager::onDotNetDownloadFinished(bool success, QString errorMsg) {
-    if (!success) {
-        emit instanceError(m_currentInstance.id, tr("Failed to download .NET runtime: %1").arg(errorMsg));
-        return;
-    }
-
-    QString tempPath = QDir::tempPath() + "/windowsdesktop-runtime-8.0.24-win-x64.exe";
-    QString prefixPath = protonPrefixPath(m_currentInstance);
-
-    QProcess *proc = new QProcess(this);
-
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("STEAM_COMPAT_DATA_PATH", prefixPath);
-    env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", m_currentProton.path + "/../..");
-    proc->setProcessEnvironment(env);
-
-    bool isFlatpakLauncher = QFileInfo("/app/bin/legacy-launcher").exists();
-    QString actualProtonPath = m_currentProton.path;
-
-    if (isFlatpakLauncher && m_currentProton.isFlatpak) {
-        QString flatpakSteamPath = QDir::homePath() + "/.var/app/com.valvesoftware.Steam";
-        if (m_currentProton.path.startsWith(flatpakSteamPath)) {
-            QString relativePath = m_currentProton.path.mid(flatpakSteamPath.length());
-            QStringList possibleHostPaths = {
-                QDir::homePath() + "/.local/share/Steam" + relativePath,
-                QDir::homePath() + "/.steam/steam" + relativePath,
-                QDir::homePath() + "/.steam/root" + relativePath
-            };
-            for (const QString &hostPath : possibleHostPaths) {
-                if (QFileInfo(hostPath).exists()) {
-                    actualProtonPath = hostPath;
-                    break;
-                }
-            }
-            env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", actualProtonPath + "/../..");
-        }
-    }
-
-    if (m_currentProton.isFlatpak && !isFlatpakLauncher) {
-        proc->setProgram("flatpak");
-        proc->setArguments({"run", "--command=" + m_currentProton.protonExecutable,
-                           "com.valvesoftware.Steam", "run", tempPath});
-    } else if (isFlatpakLauncher) {
-        QString wrapperPath = QDir::homePath() + "/.local/share/LegacyLauncher/dotnet-wrapper.sh";
-        QFile wrapperFile(wrapperPath);
-        if (wrapperFile.open(QIODevice::WriteOnly)) {
-            QTextStream out(&wrapperFile);
-            out << "#!/bin/bash\n";
-            out << "export LD_LIBRARY_PATH=/usr/lib:/usr/lib64:/lib:/lib64:$LD_LIBRARY_PATH\n";
-            out << "export STEAM_COMPAT_DATA_PATH=\"" << prefixPath << "\"\n";
-            out << "export STEAM_COMPAT_CLIENT_INSTALL_PATH=\"" << actualProtonPath << "/../..\"\n";
-            out << "exec \"" << actualProtonPath << "/proton\" run \"" << tempPath << "\" \"$@\"\n";
-            wrapperFile.close();
-            QProcess::execute("chmod", {"+x", wrapperPath});
-        }
-        proc->setProgram("flatpak-spawn");
-        proc->setArguments({"--host", wrapperPath});
-    } else {
-        bool isAppImage = QFileInfo(QCoreApplication::applicationDirPath() + "/../Libs").exists() ||
-                          QCoreApplication::applicationDirPath().contains(".AppImage");
-
-        if (isAppImage) {
-            QString wrapperPath = QDir::homePath() + "/.local/share/LegacyLauncher/appimage-dotnet-wrapper.sh";
-            QFile wrapperFile(wrapperPath);
-            if (wrapperFile.open(QIODevice::WriteOnly)) {
-                QTextStream out(&wrapperFile);
-                out << "#!/bin/bash\n";
-                out << "export LD_LIBRARY_PATH=\"" << QCoreApplication::applicationDirPath() << "/../usr/lib:" << QCoreApplication::applicationDirPath() << "/usr/lib:$LD_LIBRARY_PATH\"\n";
-                out << "export STEAM_COMPAT_DATA_PATH=\"" << prefixPath << "\"\n";
-                out << "export STEAM_COMPAT_CLIENT_INSTALL_PATH=\"" << actualProtonPath << "/../..\"\n";
-                out << "exec \"" << actualProtonPath << "/proton\" run \"" << tempPath << "\" \"$@\"\n";
-                wrapperFile.close();
-                QProcess::execute("chmod", {"+x", wrapperPath});
-            }
-            proc->setProgram(wrapperPath);
-            proc->setArguments({});
-        } else {
-            proc->setProgram(actualProtonPath + "/proton");
-            proc->setArguments({"run", tempPath});
-        }
-    }
-
-    qDebug() << "Installing .NET runtime with:" << proc->program() << proc->arguments();
-
-    connect(proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            this, &LaunchManager::onDotNetInstallFinished);
-    proc->start();
-
-    if (!proc->waitForStarted(3000)) {
-        proc->deleteLater();
-        emit instanceError(m_currentInstance.id, tr("Failed to start .NET runtime installer"));
-        return;
-    }
-}
-
-void LaunchManager::onDotNetInstallFinished(int exitCode, QProcess::ExitStatus) {
-    QProcess *proc = qobject_cast<QProcess *>(sender());
-    proc->deleteLater();
-
-    QString tempPath = QDir::tempPath() + "/windowsdesktop-runtime-8.0.24-win-x64.exe";
-    QFile::remove(tempPath);
-
-    if (exitCode != 0) {
-        qWarning() << ".NET runtime installer exited with code:" << exitCode;
-    }
-
-    createWeaveLoaderJson(m_currentInstance.installPath);
-    continueLaunch();
-}
-
 bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &proton) {
     if (isRunning(instance.id)) return false;
 
-    m_currentInstance = instance;
-    m_currentProton = proton;
-
     if (instance.weaveLoaderEnabled) {
         m_currentGameExe = instance.installPath + "/WeaveLoader.exe";
     } else {
         m_currentGameExe = instance.installPath + "/Minecraft.Client.exe";
     }
 
+    m_currentInstance = instance;
+    m_currentProton = proton;
+
     QString prefixPath = protonPrefixPath(instance);
     QDir().mkpath(prefixPath);
-
-    if (instance.weaveLoaderEnabled) {
-        installDotNetRuntime(instance, proton);
-        return true;
-    }
 
     continueLaunch();
     return true;

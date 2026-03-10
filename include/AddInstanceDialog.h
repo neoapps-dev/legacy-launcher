@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "Downloader.h"
 #include <QDialog>
 #include <QList>
 #include <QLineEdit>
@@ -10,10 +11,10 @@
 #include <QLabel>
 #include <QStackedWidget>
 #include <QCheckBox>
+#include <QProcess>
 
 class GitHubReleaseTracker;
 class WeaveLoaderReleaseTracker;
-class Downloader;
 
 class AddInstanceDialog : public QDialog {
     Q_OBJECT
@@ -32,6 +33,8 @@ private slots:
     void onDownloadFinished(bool success, QString error);
     void onBrowseInstallPath();
     void onWeaveLoaderCheckChanged(int state);
+    void onDotNetDownloadFinished(bool success, QString error);
+    void onDotNetInstallFinished(int exitCode, QProcess::ExitStatus);
 
 private:
     QList<ProtonInstallation> m_protons;
@@ -55,9 +58,13 @@ private:
     QCheckBox *m_weaveLoaderCheck;
     QComboBox *m_weaveLoaderCombo;
     bool m_downloadingWeaveLoader;
+    bool m_installingDotNet;
+    ProtonInstallation m_selectedProton;
 
     void setupUi();
     void extractZip(const QString &zipPath, const QString &destDir);
     QString formatSize(qint64 bytes);
     void checkInstallReady();
+    void createWeaveLoaderJson(const QString &installPath);
+    void installDotNetRuntime(const QString &installPath, const ProtonInstallation &proton);
 };
