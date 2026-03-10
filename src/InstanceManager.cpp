@@ -110,6 +110,9 @@ void InstanceManager::load() {
             inst.autoIp = obj["autoIp"].toString();
             inst.autoPort = obj["autoPort"].toInt(0);
             inst.lastRun = QDateTime::fromString(obj["lastRun"].toString(), Qt::ISODate);
+            inst.weaveLoaderEnabled = obj["weaveLoaderEnabled"].toBool(false);
+            inst.weaveLoaderTag = obj["weaveLoaderTag"].toString();
+            inst.weaveLoaderInstalledAt = QDateTime::fromString(obj["weaveLoaderInstalledAt"].toString(), Qt::ISODate);
             m_instances.append(inst);
         }
     }
@@ -129,6 +132,9 @@ void InstanceManager::saveInstance(const Instance &inst) {
     obj["autoIp"] = inst.autoIp;
     obj["autoPort"] = inst.autoPort;
     obj["lastRun"] = inst.lastRun.toString(Qt::ISODate);
+    obj["weaveLoaderEnabled"] = inst.weaveLoaderEnabled;
+    obj["weaveLoaderTag"] = inst.weaveLoaderTag;
+    obj["weaveLoaderInstalledAt"] = inst.weaveLoaderInstalledAt.toString(Qt::ISODate);
 
     QFile f(instanceJson);
     if (f.open(QIODevice::WriteOnly)) {

@@ -19,7 +19,13 @@ bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &p
     proc->setProperty("instanceId", instance.id);
 
     QStringList args = buildGameArgs(instance);
-    QString gameExe = instance.installPath + "/Minecraft.Client.exe";
+    QString gameExe;
+
+    if (instance.weaveLoaderEnabled) {
+        gameExe = instance.installPath + "/WeaveLoader.exe";
+    } else {
+        gameExe = instance.installPath + "/Minecraft.Client.exe";
+    }
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("STEAM_COMPAT_DATA_PATH", prefixPath);
@@ -44,20 +50,21 @@ bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &p
                     break;
                 }
             }
-            
+
             QString instanceRelativePath = instance.installPath.mid(QDir::homePath().length());
             QStringList possibleInstanceHostPaths = {
                 QDir::homePath() + "/.local/share/LegacyLauncher" + instanceRelativePath,
                 QDir::homePath() + instanceRelativePath
             };
+            QString exeToCheck = instance.weaveLoaderEnabled ? "/WeaveLoader.exe" : "/Minecraft.Client.exe";
             for (const QString &hostPath : possibleInstanceHostPaths) {
-                if (QFileInfo(hostPath + "/Minecraft.Client.exe").exists()) {
-                    actualGameExe = hostPath + "/Minecraft.Client.exe";
+                if (QFileInfo(hostPath + exeToCheck).exists()) {
+                    actualGameExe = hostPath + exeToCheck;
                     break;
                 }
             }
-            
-            env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", 
+
+            env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH",
                 actualProtonPath + "/../..");
         }
     }
@@ -84,13 +91,13 @@ bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &p
             wrapperFile.close();
             QProcess::execute("chmod", {"+x", wrapperPath});
         }
-        
+
         proc->setProgram("flatpak-spawn");
         fullArgs << "--host" << wrapperPath;
     } else {
-        bool isAppImage = QFileInfo(QCoreApplication::applicationDirPath() + "/../Libs").exists() || 
+        bool isAppImage = QFileInfo(QCoreApplication::applicationDirPath() + "/../Libs").exists() ||
                           QCoreApplication::applicationDirPath().contains(".AppImage");
-        
+
         if (isAppImage) {
             QString wrapperPath = QDir::homePath() + "/.local/share/LegacyLauncher/appimage-wrapper.sh";
             QFile wrapperFile(wrapperPath);

@@ -1,4 +1,5 @@
 #include "SettingsDialog.h"
+#include "WeaveLoaderReleaseTracker.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -11,10 +12,16 @@ SettingsDialog::SettingsDialog(Instance instance, const QList<ProtonInstallation
     : QDialog(parent)
     , m_instance(instance)
     , m_protons(protons)
+    , m_weaveLoaderTracker(new WeaveLoaderReleaseTracker(this))
 {
     setWindowTitle(tr("Instance Settings — %1").arg(instance.name));
     setMinimumWidth(500);
     setupUi();
+
+    connect(m_weaveLoaderTracker, &WeaveLoaderReleaseTracker::releasesUpdated, this, &SettingsDialog::onWeaveLoaderReleasesUpdated);
+    connect(m_weaveLoaderTracker, &WeaveLoaderReleaseTracker::fetchError, this, &SettingsDialog::onWeaveLoaderFetchError);
+
+    m_weaveLoaderTracker->fetchReleases();
 }
 
 void SettingsDialog::setupUi() {
@@ -66,6 +73,25 @@ void SettingsDialog::setupUi() {
     serverLayout->addLayout(serverForm);
     mainLayout->addWidget(serverGroup);
 
+    QGroupBox *weaveGroup = new QGroupBox(tr("Weave Loader"));
+    QVBoxLayout *weaveLayout = new QVBoxLayout(weaveGroup);
+
+    m_weaveLoaderCheck = new QCheckBox(tr("Enable Weave Loader"));
+    m_weaveLoaderCheck->setChecked(m_instance.weaveLoaderEnabled);
+    weaveLayout->addWidget(m_weaveLoaderCheck);
+
+    m_weaveLoaderCombo = new QComboBox();
+    m_weaveLoaderCombo->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed);
+    weaveLayout->addWidget(m_weaveLoaderCombo);
+
+    m_weaveLoaderStatusLabel = new QLabel(tr("Fetching versions..."));
+    m_weaveLoaderStatusLabel->setEnabled(false);
+    weaveLayout->addWidget(m_weaveLoaderStatusLabel);
+
+    connect(m_weaveLoaderCheck, &QCheckBox::stateChanged, this, &SettingsDialog::onWeaveLoaderCheckChanged);
+
+    mainLayout->addWidget(weaveGroup);
+
     QLabel *pathLabel = new QLabel(tr("Install path: %1").arg(m_instance.installPath));
     pathLabel->setEnabled(false);
     pathLabel->setWordWrap(true);
@@ -89,7 +115,59 @@ void SettingsDialog::onAccept() {
         m_instance.protonId = m_protons[idx].path;
     }
 
+    bool wasEnabled = m_instance.weaveLoaderEnabled;
+    m_instance.weaveLoaderEnabled = m_weaveLoaderCheck->isChecked();
+
+    if (m_instance.weaveLoaderEnabled && m_weaveLoaderCombo->currentIndex() >= 0) {
+        int wlIdx = m_weaveLoaderCombo->currentIndex();
+        if (wlIdx >= 0 && wlIdx < m_weaveLoaderReleases.size()) {
+            QString newTag = m_weaveLoaderReleases[wlIdx].tag;
+            if (newTag != m_instance.weaveLoaderTag) {
+                m_instance.weaveLoaderTag = newTag;
+                m_instance.weaveLoaderInstalledAt = QDateTime::currentDateTime();
+            }
+        }
+    } else {
+        m_instance.weaveLoaderEnabled = false;
+        m_instance.weaveLoaderTag = "";
+        m_instance.weaveLoaderInstalledAt = QDateTime();
+    }
+
     accept();
+}
+
+void SettingsDialog::onWeaveLoaderReleasesUpdated(QList<ReleaseInfo> releases) {
+    m_weaveLoaderReleases = releases;
+    m_weaveLoaderCombo->clear();
+
+    for (const ReleaseInfo &r : releases) {
+        QString label = r.tag + " — " + r.publishedAt.toLocalTime().toString("yyyy-MM-dd HH:mm");
+        if (r.tag == m_instance.weaveLoaderTag) {
+            label += tr(" (current)");
+        }
+        m_weaveLoaderCombo->addItem(label, r.tag);
+    }
+
+    if (!m_instance.weaveLoaderTag.isEmpty()) {
+        for (int i = 0; i < m_weaveLoaderReleases.size(); ++i) {
+            if (m_weaveLoaderReleases[i].tag == m_instance.weaveLoaderTag) {
+                m_weaveLoaderCombo->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
+
+    m_weaveLoaderCombo->setEnabled(!releases.isEmpty());
+    m_weaveLoaderStatusLabel->setText(releases.isEmpty() ? tr("No versions found") : tr("%1 versions available").arg(releases.size()));
+}
+
+void SettingsDialog::onWeaveLoaderFetchError(QString msg) {
+    m_weaveLoaderStatusLabel->setText(tr("Error fetching versions"));
+    qWarning() << "WeaveLoader fetch error:" << msg;
+}
+
+void SettingsDialog::onWeaveLoaderCheckChanged(int state) {
+    m_weaveLoaderCombo->setEnabled(state == Qt::Checked && !m_weaveLoaderReleases.isEmpty());
 }
 
 Instance SettingsDialog::updatedInstance() const {

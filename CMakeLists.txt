@@ -15,6 +15,7 @@ set(SOURCES
     src/InstanceManager.cpp
     src/ProtonDetector.cpp
     src/GitHubReleaseTracker.cpp
+    src/WeaveLoaderReleaseTracker.cpp
     src/Downloader.cpp
     src/LaunchManager.cpp
     src/AddInstanceDialog.cpp
@@ -28,6 +29,7 @@ set(HEADERS
     include/InstanceManager.h
     include/ProtonDetector.h
     include/GitHubReleaseTracker.h
+    include/WeaveLoaderReleaseTracker.h
     include/Downloader.h
     include/LaunchManager.h
     include/AddInstanceDialog.h
