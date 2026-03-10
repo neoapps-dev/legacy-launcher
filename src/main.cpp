@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     app.setApplicationName("LegacyLauncher");
     app.setOrganizationName("LegacyLauncher");
-    app.setApplicationVersion("1.0.0");
+    app.setApplicationVersion(VERSION);
 
     QCommandLineParser parser;
     parser.setApplicationDescription("Legacy Launcher for Minecraft Legacy Console Edition");
@@ -26,14 +26,12 @@ int main(int argc, char *argv[]) {
         QString lastId = mgr.lastRanId();
 
         if (lastId.isEmpty()) {
-            qWarning("No last-ran instance found.");
-            return 1;
+            qWarning("No last-ran instance found. Showing launcher...");
         }
 
         Instance *inst = mgr.findById(lastId);
         if (!inst) {
-            qWarning("Last-ran instance not found.");
-            return 1;
+            qWarning("Last-ran instance not found. Showing launcher...");
         }
 
         QList<ProtonInstallation> protons = ProtonDetector::detect();

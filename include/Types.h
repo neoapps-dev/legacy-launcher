@@ -31,4 +31,7 @@ struct Instance {
     QString autoIp;
     int autoPort;
     QDateTime lastRun;
+    bool weaveLoaderEnabled;
+    QString weaveLoaderTag;
+    QDateTime weaveLoaderInstalledAt;
 };

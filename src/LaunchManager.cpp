@@ -9,8 +9,15 @@ LaunchManager::LaunchManager(QObject *parent)
     : QObject(parent)
 {}
 
-bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &proton) {
-    if (isRunning(instance.id)) return false;
+void LaunchManager::continueLaunch() {
+    const Instance &instance = m_currentInstance;
+    const ProtonInstallation &proton = m_currentProton;
+    QString gameExe = m_currentGameExe;
+
+    if (isRunning(instance.id)) {
+        emit instanceError(instance.id, tr("Instance already running"));
+        return;
+    }
 
     QString prefixPath = protonPrefixPath(instance);
     QDir().mkpath(prefixPath);
@@ -19,7 +26,6 @@ bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &p
     proc->setProperty("instanceId", instance.id);
 
     QStringList args = buildGameArgs(instance);
-    QString gameExe = instance.installPath + "/Minecraft.Client.exe";
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("STEAM_COMPAT_DATA_PATH", prefixPath);
@@ -44,20 +50,21 @@ bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &p
                     break;
                 }
             }
-            
+
             QString instanceRelativePath = instance.installPath.mid(QDir::homePath().length());
             QStringList possibleInstanceHostPaths = {
                 QDir::homePath() + "/.local/share/LegacyLauncher" + instanceRelativePath,
                 QDir::homePath() + instanceRelativePath
             };
+            QString exeToCheck = instance.weaveLoaderEnabled ? "/WeaveLoader.exe" : "/Minecraft.Client.exe";
             for (const QString &hostPath : possibleInstanceHostPaths) {
-                if (QFileInfo(hostPath + "/Minecraft.Client.exe").exists()) {
-                    actualGameExe = hostPath + "/Minecraft.Client.exe";
+                if (QFileInfo(hostPath + exeToCheck).exists()) {
+                    actualGameExe = hostPath + exeToCheck;
                     break;
                 }
             }
-            
-            env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH", 
+
+            env.insert("STEAM_COMPAT_CLIENT_INSTALL_PATH",
                 actualProtonPath + "/../..");
         }
     }
@@ -84,13 +91,13 @@ bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &p
             wrapperFile.close();
             QProcess::execute("chmod", {"+x", wrapperPath});
         }
-        
+
         proc->setProgram("flatpak-spawn");
         fullArgs << "--host" << wrapperPath;
     } else {
-        bool isAppImage = QFileInfo(QCoreApplication::applicationDirPath() + "/../Libs").exists() || 
+        bool isAppImage = QFileInfo(QCoreApplication::applicationDirPath() + "/../Libs").exists() ||
                           QCoreApplication::applicationDirPath().contains(".AppImage");
-        
+
         if (isAppImage) {
             QString wrapperPath = QDir::homePath() + "/.local/share/LegacyLauncher/appimage-wrapper.sh";
             QFile wrapperFile(wrapperPath);
@@ -129,10 +136,28 @@ bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &p
         m_processes.remove(instance.id);
         proc->deleteLater();
         emit instanceError(instance.id, tr("Failed to start process"));
-        return false;
+        return;
     }
 
     emit instanceStarted(instance.id);
+}
+
+bool LaunchManager::launch(const Instance &instance, const ProtonInstallation &proton) {
+    if (isRunning(instance.id)) return false;
+
+    if (instance.weaveLoaderEnabled) {
+        m_currentGameExe = instance.installPath + "/WeaveLoader.exe";
+    } else {
+        m_currentGameExe = instance.installPath + "/Minecraft.Client.exe";
+    }
+
+    m_currentInstance = instance;
+    m_currentProton = proton;
+
+    QString prefixPath = protonPrefixPath(instance);
+    QDir().mkpath(prefixPath);
+
+    continueLaunch();
     return true;
 }
 
@@ -176,7 +201,6 @@ QString LaunchManager::protonPrefixPath(const Instance &instance) const {
 
 QStringList LaunchManager::buildGameArgs(const Instance &instance) const {
     QStringList args;
-
     if (!instance.username.isEmpty()) {
         args << "-name" << instance.username;
     }

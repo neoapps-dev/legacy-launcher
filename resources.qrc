@@ -5,5 +5,6 @@
         <file>assets/logo.png</file>
         <file>packaging/icon.png</file>
         <file>assets/icon_profile.jpg</file>
+        <file>packaging/icon.png</file>
     </qresource>
 </RCC>

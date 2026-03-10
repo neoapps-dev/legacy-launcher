@@ -25,8 +25,11 @@ private slots:
 
 private:
     QMap<QString, QProcess *> m_processes;
+    Instance m_currentInstance;
+    ProtonInstallation m_currentProton;
+    QString m_currentGameExe;
 
     QString protonPrefixPath(const Instance &instance) const;
-    QStringList buildProtonCommand(const Instance &instance, const ProtonInstallation &proton) const;
     QStringList buildGameArgs(const Instance &instance) const;
+    void continueLaunch();
 };

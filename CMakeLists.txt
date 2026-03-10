@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LegacyLauncher VERSION 1.0.0 LANGUAGES CXX)
+project(LegacyLauncher VERSION 1.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,6 +15,7 @@ set(SOURCES
     src/InstanceManager.cpp
     src/ProtonDetector.cpp
     src/GitHubReleaseTracker.cpp
+    src/WeaveLoaderReleaseTracker.cpp
     src/Downloader.cpp
     src/LaunchManager.cpp
     src/AddInstanceDialog.cpp
@@ -29,6 +30,7 @@ set(HEADERS
     include/InstanceManager.h
     include/ProtonDetector.h
     include/GitHubReleaseTracker.h
+    include/WeaveLoaderReleaseTracker.h
     include/Downloader.h
     include/LaunchManager.h
     include/AddInstanceDialog.h
@@ -38,9 +40,11 @@ set(HEADERS
     include/Types.h
 )
 
-add_executable(legacy-launcher ${SOURCES} ${HEADERS})
+add_executable(legacy-launcher ${SOURCES} ${HEADERS} resources.qrc)
 
 target_include_directories(legacy-launcher PRIVATE include)
+
+target_compile_definitions(legacy-launcher PRIVATE VERSION="${PROJECT_VERSION}")
 
 target_link_libraries(legacy-launcher PRIVATE
     Qt6::Core
