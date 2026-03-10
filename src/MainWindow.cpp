@@ -28,6 +28,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_instanceManager(new InstanceManager(this)),
@@ -170,7 +173,32 @@ void MainWindow::setupUi() {
   btnSettings->setObjectName("sidebarBtn");
   btnSettings->setCheckable(true);
   sidebarLayout->addWidget(btnSettings);
+  m_sidebarGroup->addButton(btnSettings, 2);
   sidebarLayout->addSpacing(10);
+
+  m_sidebarIndicator = new QWidget(sidebar);
+  m_sidebarIndicator->setFixedWidth(4);
+  m_sidebarIndicator->setFixedHeight(48);
+  m_sidebarIndicator->setStyleSheet("background-color: #3BA55D; border-top-right-radius: 2px; border-bottom-right-radius: 2px; border: none;");
+  m_sidebarIndicator->show();
+  m_sidebarIndicator->raise();
+
+  m_sidebarIndicatorAnim = new QPropertyAnimation(m_sidebarIndicator, "pos", this);
+  m_sidebarIndicatorAnim->setDuration(250);
+  m_sidebarIndicatorAnim->setEasingCurve(QEasingCurve::InOutQuad);
+
+  QTimer::singleShot(100, this, [this]() {
+      if (m_sidebarGroup && m_sidebarGroup->checkedButton()) {
+          m_sidebarIndicator->move(0, m_sidebarGroup->checkedButton()->pos().y());
+      }
+  });
+
+  connect(m_sidebarGroup, &QButtonGroup::buttonClicked, this, [this](QAbstractButton *button) {
+      if (!m_sidebarIndicator) return;
+      m_sidebarIndicatorAnim->stop();
+      m_sidebarIndicatorAnim->setEndValue(QPoint(0, button->pos().y()));
+      m_sidebarIndicatorAnim->start();
+  });
 
   mainLayout->addWidget(sidebar);
 
@@ -222,7 +250,8 @@ void MainWindow::setupUi() {
   rightLayout->addWidget(topNav);
 
   m_mainStack = new QStackedWidget();
-
+  
+  m_stackFadeAnim = new QPropertyAnimation(this, "windowOpacity", this);
   // --- PLAY TAB ---
   m_playTab = new QWidget();
   m_playTab->setObjectName("playTabContent");
@@ -416,13 +445,43 @@ void MainWindow::setupUi() {
 }
 
 void MainWindow::onTabNavClicked(int id) {
-  if (id < m_mainStack->count()) {
+  if (m_mainStack->currentIndex() == id) return;
+
+  QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(m_mainStack);
+  m_mainStack->setGraphicsEffect(eff);
+  QPropertyAnimation *a = new QPropertyAnimation(eff, "opacity");
+  a->setDuration(150);
+  a->setStartValue(1.0);
+  a->setEndValue(0.0);
+  connect(a, &QPropertyAnimation::finished, this, [this, id, eff, a]() {
       m_mainStack->setCurrentIndex(id);
-  }
+      a->setDirection(QAbstractAnimation::Backward);
+      connect(a, &QPropertyAnimation::finished, eff, &QObject::deleteLater);
+      connect(a, &QPropertyAnimation::finished, a, &QObject::deleteLater);
+      a->start();
+  });
+  a->start();
 }
 
 void MainWindow::onPlayButtonClicked() {
     if (m_instanceCombo->count() == 0) return;
+
+    QPropertyAnimation *a = new QPropertyAnimation(m_playBtn, "geometry");
+    a->setDuration(100);
+    QRect orig = m_playBtn->geometry();
+    a->setEndValue(orig.adjusted(2, 2, -2, -2));
+    a->setEasingCurve(QEasingCurve::OutQuad);
+    connect(a, &QPropertyAnimation::finished, this, [this, orig]() {
+        QPropertyAnimation *b = new QPropertyAnimation(m_playBtn, "geometry");
+        b->setDuration(100);
+        b->setStartValue(m_playBtn->geometry());
+        b->setEndValue(orig);
+        b->setEasingCurve(QEasingCurve::OutBack);
+        connect(b, &QPropertyAnimation::finished, b, &QObject::deleteLater);
+        b->start();
+    });
+    a->start();
+
     QString id = m_instanceCombo->currentData().toString();
     
     if (m_launchManager->isRunning(id)) {

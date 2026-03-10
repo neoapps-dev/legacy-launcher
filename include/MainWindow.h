@@ -13,6 +13,7 @@
 #include <QButtonGroup>
 #include <QStackedWidget>
 #include <QTextBrowser>
+#include <QPropertyAnimation>
 
 class InstanceManager;
 class ProtonDetector;
@@ -58,6 +59,9 @@ private:
     QButtonGroup *m_tabGroup;
     QButtonGroup *m_sidebarGroup;
     QStackedWidget *m_mainStack;
+    QWidget *m_sidebarIndicator;
+    QPropertyAnimation *m_sidebarIndicatorAnim;
+    QPropertyAnimation *m_stackFadeAnim;
 
     // Play Tab
     QWidget *m_playTab;

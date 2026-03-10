@@ -17,17 +17,23 @@ InstanceWidget::InstanceWidget(const Instance &instance, QWidget *parent)
 }
 
 void InstanceWidget::setupUi() {
-    QFrame *card = new QFrame(this);
-    card->setObjectName("instanceCard");
+    m_card = new QFrame(this);
+    m_card->setObjectName("instanceCard");
     
-    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
-    shadow->setBlurRadius(15);
-    shadow->setXOffset(0);
-    shadow->setYOffset(4);
-    shadow->setColor(QColor(0, 0, 0, 80));
-    card->setGraphicsEffect(shadow);
+    m_shadow = new QGraphicsDropShadowEffect(m_card);
+    m_shadow->setBlurRadius(15);
+    m_shadow->setXOffset(0);
+    m_shadow->setYOffset(4);
+    m_shadow->setColor(QColor(0, 0, 0, 80));
+    m_card->setGraphicsEffect(m_shadow);
 
-    QHBoxLayout *cardLayout = new QHBoxLayout(card);
+    m_blurAnim = new QPropertyAnimation(m_shadow, "blurRadius", this);
+    m_blurAnim->setDuration(200);
+    
+    m_offsetAnim = new QPropertyAnimation(m_shadow, "yOffset", this);
+    m_offsetAnim->setDuration(200);
+
+    QHBoxLayout *cardLayout = new QHBoxLayout(m_card);
     cardLayout->setContentsMargins(20, 16, 20, 16);
     cardLayout->setSpacing(16);
 
@@ -80,9 +86,9 @@ void InstanceWidget::setupUi() {
 
     cardLayout->addLayout(actionsLayout);
 
-    QVBoxLayout *rootLayout = new QVBoxLayout(this);
-    rootLayout->setContentsMargins(8, 4, 8, 4);
-    rootLayout->addWidget(card);
+    m_rootLayout = new QVBoxLayout(this);
+    m_rootLayout->setContentsMargins(8, 4, 8, 4);
+    m_rootLayout->addWidget(m_card);
 
     connect(m_launchBtn, &QPushButton::clicked, this, [this]() {
         if (m_running) emit stopRequested(m_instance.id);
@@ -97,6 +103,30 @@ void InstanceWidget::setupUi() {
     connect(m_deleteBtn, &QPushButton::clicked, this, [this]() {
         emit deleteRequested(m_instance.id);
     });
+}
+
+void InstanceWidget::enterEvent(QEnterEvent *event) {
+    m_blurAnim->stop();
+    m_blurAnim->setEndValue(25);
+    m_blurAnim->start();
+
+    m_offsetAnim->stop();
+    m_offsetAnim->setEndValue(8);
+    m_offsetAnim->start();
+    
+    QWidget::enterEvent(event);
+}
+
+void InstanceWidget::leaveEvent(QEvent *event) {
+    m_blurAnim->stop();
+    m_blurAnim->setEndValue(15);
+    m_blurAnim->start();
+
+    m_offsetAnim->stop();
+    m_offsetAnim->setEndValue(4);
+    m_offsetAnim->start();
+
+    QWidget::leaveEvent(event);
 }
 
 void InstanceWidget::setInstance(const Instance &instance) {

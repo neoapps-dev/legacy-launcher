@@ -63,13 +63,12 @@ QWidget#userCard {
 
 QPushButton#sidebarBtn {
     text-align: left;
-    padding: 5px 10px 5px 20px;
+    padding: 5px 10px 5px 24px;
     background: transparent;
     color: #cccccc;
     border: none;
     font-weight: normal;
     font-size: 14px;
-    border-left: 4px solid transparent;
     margin-bottom: 2px;
     height: 48px;
 }
@@ -81,7 +80,6 @@ QPushButton#sidebarBtn:checked {
     background-color: rgba(255, 255, 255, 0.08);
     color: #ffffff;
     font-weight: bold;
-    border-left: 4px solid #3BA55D;
 }
 
 /* Top Nav (Tabs) */
