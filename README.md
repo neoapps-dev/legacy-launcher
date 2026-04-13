@@ -1,3 +1,6 @@
+> THIS LAUNCHER HAS BEEN DEPRECATED
+> MOVE OVER TO [Emerald Launcher](https://github.com/LCE-Hub/LCE-Emerald-Launcher)
+
 <div align="center">
   <img height="150" src="https://raw.githubusercontent.com/neoapps-dev/legacy-launcher/refs/heads/main/packaging/icon.png">
   <h1>Legacy Launcher</h1>
